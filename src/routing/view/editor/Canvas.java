@@ -11,8 +11,11 @@ import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.Locale;
 
+import routing.control.EditorController;
 import routing.control.entities.Edge;
 import routing.control.entities.Graph;
+import routing.control.entities.Session;
+
 import javax.swing.JPanel;
 import routing.control.entities.Node;
 
@@ -380,20 +383,25 @@ public class Canvas extends JPanel {
 	 * @return The color.
 	 */
 	public Color getColorForEntity(Object value, Boolean lineColor) {
-
+		Session s = EditorController.getCurrentSession();
+		
 		if (value instanceof Edge) {
 			if (_editor.getEditorMode() == DocumentEditor.EditorMode.Simulation) {
 				return Color.BLACK;
 			} else
 				return ((Edge) value).isSelected() ? Color.BLUE : Color.BLACK;
 		} else if (value instanceof Node) {
-			if (!lineColor)
-				return Color.WHITE;
-
 			if (_editor.getEditorMode() == DocumentEditor.EditorMode.Simulation) {
 				return Color.BLACK;
-			} else
+			} else if(s != null && s.sourceId == ((Node)value).id && !lineColor) {
+				return new Color(187, 215, 242);
+			} else if(s != null && s.destinationIds.contains(((Node)value).id) && !lineColor) {
+				return new Color(253, 176, 176);
+			} else {
+				if (!lineColor)
+					return Color.WHITE;
 				return ((Node) value).selected ? Color.BLUE : Color.BLACK;
+			}
 		}
 
 		return Color.WHITE;

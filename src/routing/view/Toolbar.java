@@ -25,7 +25,6 @@ public class Toolbar extends JToolBar{
     private JButton btnSaveAs;
     private JButton btnClose;
     private JButton btnExit;
-    private JButton btnSession;
 
     public JToggleButton btnSelection;
     public JToggleButton btnAddNode;
@@ -80,11 +79,6 @@ public class Toolbar extends JToolBar{
         btnExit.setText("");
         btnExit.setIcon(fileRm.getImageIcon("quitAction.Action.icon"));
         add(btnExit);
-        
-        btnSession = new JButton();
-        btnSession.setAction(editorActionMap.get("showSessionEditorAction"));
-        btnSession.setText("session");
-        add(btnSession);
 
         addSeparator();
 

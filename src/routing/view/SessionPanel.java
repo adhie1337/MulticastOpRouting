@@ -1,8 +1,10 @@
 package routing.view;
 
 import java.awt.BorderLayout;
+import java.util.ResourceBundle;
 import java.util.Vector;
 
+import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JList;
@@ -12,7 +14,14 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.jdesktop.application.Action;
+import org.jdesktop.application.Application;
+import org.jdesktop.application.ApplicationContext;
+import org.jdesktop.application.ResourceMap;
+
+import routing.RoutingDemo;
 import routing.control.Document;
+import routing.control.EditorController;
 import routing.control.entities.Session;
 
 public class SessionPanel extends JPanel implements ListSelectionListener {
@@ -24,6 +33,9 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 	private JButton btnRemove;
 
 	public SessionPanel() {
+        ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
+        ActionMap editorMap = c.getActionMap(EditorController.getInstance());
+        ResourceMap resources = c.getResourceMap(SessionPanel.class);
 		setBorder(BorderFactory.createTitledBorder("Sessions"));
 
 		JPanel unitGroup = new JPanel();
@@ -39,10 +51,12 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 		unitGroup.add(new JScrollPane(sessionList), BorderLayout.CENTER);
 		unitGroup.add(buttonPanel, BorderLayout.SOUTH);
 
-		btnAdd = new JButton("Add");
+		btnAdd = new JButton(editorMap.get("newSessionAction"));
 		btnAdd.setEnabled(false);
-		btnRemove = new JButton("Remove");
+		btnAdd.setText(resources.getString("SessionPanel.btnAdd.Text"));
+		btnRemove = new JButton(c.getActionMap(this).get("removeSession"));
 		btnRemove.setEnabled(false);
+		btnRemove.setText(resources.getString("SessionPanel.btnRemove.Text"));
 
 		buttonPanel.add(btnAdd);
 		buttonPanel.add(btnRemove);
@@ -62,6 +76,7 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
+		EditorController.setCurrentSession(sessionList.getSelectedValue());
 		checkActionsState();
 	}
 
@@ -80,4 +95,38 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 	public Session getSelectedSession() {
 		return sessionList.getSelectedValue();
 	}
+	
+	public void selectSession(int id) {
+		for(int i = 0; i < document.sessions.size(); ++i) {
+			if(document.sessions.get(i).id == id) {
+				sessionList.setSelectedIndex(i);
+				valueChanged(null);
+				break;
+			}
+		}
+	}
+	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+
+		btnAdd.setEnabled(enabled);
+		btnRemove.setEnabled(enabled);
+		sessionList.setEnabled(enabled);
+		
+		if(enabled) {
+			checkActionsState();
+		}
+	}
+	
+	@Action
+	public void removeSession(){
+		if(sessionList.getSelectedValue() != null) {
+			document.sessions.remove(sessionList.getSelectedValue());
+			checkActionsState();
+			RoutingDemo.getMF().checkActionsState();
+			setDocument(this.document);
+		}
+	}
+
 }

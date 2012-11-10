@@ -3,6 +3,9 @@ package routing.view.editor;
 import routing.view.editor.listeners.CanvasMouseAddEdgeListener;
 import routing.view.editor.listeners.CanvasMouseAddNodeListener;
 import routing.view.editor.listeners.CanvasMouseSelectionListener;
+import routing.view.editor.listeners.SelectSourceNodeListener;
+import routing.view.editor.listeners.SetDestinationNodesListener;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
@@ -67,7 +70,9 @@ public class DocumentEditor extends JPanel {
 		 * Clicking it will execute the transition and add or remove the
 		 * resources from the source and destination nodes.
 		 */
-		Simulation
+		Simulation,
+		SelectSourceNode,
+		SelectDestinationNodes
 	};
 
 	private Document _document;
@@ -103,6 +108,14 @@ public class DocumentEditor extends JPanel {
 			case SetProperties:
 				_currentMouseListener = new CanvasMouseSetPropertiesListener(
 						this);
+				break;
+			case SelectSourceNode:
+				_currentMouseListener = new SelectSourceNodeListener(this);
+				setSelection(new LinkedList<Node>());
+				break;
+			case SelectDestinationNodes:
+				_currentMouseListener = new SetDestinationNodesListener(this);
+				setSelection(new LinkedList<Node>());
 				break;
 			}
 		}

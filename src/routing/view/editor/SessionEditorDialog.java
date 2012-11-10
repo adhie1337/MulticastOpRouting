@@ -15,9 +15,15 @@ import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.ResourceMap;
 
 import routing.RoutingDemo;
+import routing.control.Document;
+import routing.control.DocumentController;
+import routing.control.EditorController;
 import routing.control.ErrorController;
 import routing.control.entities.Node;
 import routing.control.entities.Session;
+import routing.view.MainFrame;
+import routing.view.SessionPanel;
+import routing.view.editor.DocumentEditor.EditorMode;
 
 public class SessionEditorDialog extends JDialog {
 	
@@ -25,7 +31,19 @@ public class SessionEditorDialog extends JDialog {
 		SelectSourceNode,
 		SelectDestinationNodes
 	}
+	
+	private static SessionEditorDialog instance;
 
+	public static SessionEditorDialog getInstance() {
+		return instance;
+	}
+	
+	private static boolean shown = false;
+	
+	public static boolean isShown() {
+		return shown;
+	}
+	
 	private JButton okButton;
 	private JButton cancelButton;
 
@@ -34,6 +52,9 @@ public class SessionEditorDialog extends JDialog {
 
 	private JLabel nameLabel;
 	private JTextField nameField;
+
+	private JLabel weightLabel;
+	private JTextField weightField;
 
 	private JLabel statusLabel;
 
@@ -66,6 +87,7 @@ public class SessionEditorDialog extends JDialog {
 		if (_session != null) {
 			idField.setText(Integer.toString(_session.id));
 			nameField.setText(_session.name);
+			weightField.setText(Integer.toString(_session.weight));
 		}
 	}
 
@@ -73,6 +95,9 @@ public class SessionEditorDialog extends JDialog {
 		super(owner);
 
 		initializeView();
+		
+		instance = this;
+		setModal(false);
 	}
 
 	private void initializeView() {
@@ -89,6 +114,8 @@ public class SessionEditorDialog extends JDialog {
 				rm.getString("SessionEditorDialog.JLabel.id.Text"));
 		nameLabel = new JLabel(
 				rm.getString("SessionEditorDialog.JLabel.name.Text"));
+		weightLabel = new JLabel(
+				rm.getString("SessionEditorDialog.JLabel.weight.Text"));
 		statusLabel = new JLabel(
 				rm.getString("SessionEditorDialog.JLabel.status.Text_source"));
 		
@@ -98,6 +125,9 @@ public class SessionEditorDialog extends JDialog {
 
 		nameField = new JTextField();
 		nameField.setSize(10, idField.getSize().height);
+
+		weightField = new JTextField();
+		weightField.setSize(10, idField.getSize().height);
 
 		okButton = new JButton(actionMap.get("commitChangesAction"));
 		okButton.setText(rm.getString("SessionEditorDialog.JButton.ok.Text"));
@@ -122,6 +152,11 @@ public class SessionEditorDialog extends JDialog {
 										GroupLayout.Alignment.CENTER)
 										.addComponent(nameLabel)
 										.addComponent(nameField))
+						.addGroup(
+								layout.createParallelGroup(
+										GroupLayout.Alignment.CENTER)
+										.addComponent(weightLabel)
+										.addComponent(weightField))
 						.addComponent(statusLabel)
 						.addGroup(
 								layout.createParallelGroup(
@@ -138,6 +173,10 @@ public class SessionEditorDialog extends JDialog {
 								layout.createSequentialGroup()
 										.addComponent(nameLabel)
 										.addComponent(nameField, 150, 150, 150))
+						.addGroup(
+								layout.createSequentialGroup()
+										.addComponent(weightLabel)
+										.addComponent(weightField, 150, 150, 150))
 						.addComponent(statusLabel, GroupLayout.Alignment.LEADING)
 						.addGroup(
 								layout.createSequentialGroup()
@@ -146,30 +185,76 @@ public class SessionEditorDialog extends JDialog {
 
 		getRootPane().setDefaultButton(okButton);
 	}
+	
+	public void setSourceId(int id) {
+		_session.sourceId = id;
+	}
+	
+	public void toggleDestinationId(int id) {
+		if(_session.destinationIds.contains(id)) {
+			_session.destinationIds.remove((Object)id);
+		} else {
+			_session.destinationIds.add(id);
+		}
+	}
 
 	@Action
 	public void closeDialogAction() {
-		dispose();
+		closeDialog();
+		SessionPanel p = RoutingDemo.getMF().sessionPanel;
+		if(p.getSelectedSession() != null) {
+			p.selectSession(p.getSelectedSession().id);
+		}
 	}
 
 	@Action
 	public void commitChangesAction() {
 		
 		if(currentState == EditorState.SelectSourceNode) {
-			setState(EditorState.SelectDestinationNodes);
-		} else if(currentState == EditorState.SelectDestinationNodes) {
-			_session.name = nameField.getText();
-	
-			try {
-				_session.id = Integer.parseInt(idField.getText());
-			} catch (Exception e) {
-				ErrorController.showError("Invalid id format!", "Error");
+			if(_session.sourceId > 0) {
+				MainFrame mf = RoutingDemo.getMF();
+				mf.getCurrentEditor().setEditorMode(EditorMode.SelectDestinationNodes);
+				setState(EditorState.SelectDestinationNodes);
+			} else {
+				ErrorController.showError("Please select a source node!", "Error");
 			}
-	
-			dispose();
-	
-			RoutingDemo.getApplication().getMainFrame().repaint();
+		} else if(currentState == EditorState.SelectDestinationNodes) {
+			if(_session.destinationIds.size() > 0) {
+					_session.name = nameField.getText();
+		
+				try {
+					_session.weight = Integer.parseInt(weightField.getText());
+				} catch (Exception e) {
+					ErrorController.showError("Invalid weight format!", "Error");
+					return;
+				}
+		
+				Document d = DocumentController.getInstance().getCurrentDocument();
+				d.sessions.add(_session);
+				RoutingDemo.getMF().sessionPanel.setDocument(d);
+				closeDialog();
+				RoutingDemo.getMF().sessionPanel.selectSession(_session.id);
+			} else {
+				ErrorController.showError("Please select at least one desrtination node!", "Error");
+			}
 		}
+	}
+	
+	public void showDialog() {
+		MainFrame mf = RoutingDemo.getMF();
+		mf.getCurrentEditor().setEditorMode(EditorMode.SelectSourceNode);
+		RoutingDemo.getApplication().show(this);
+		shown = true;
+		mf.checkActionsState();
+	}
+	
+	private void closeDialog() {
+		dispose();
+		RoutingDemo.getApplication().getMainFrame().repaint();
+		MainFrame mf = RoutingDemo.getMF();
+		mf.getCurrentEditor().setEditorMode(EditorMode.Selection);
+		shown = false;
+		mf.checkActionsState();
 	}
 
 

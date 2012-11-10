@@ -78,7 +78,15 @@ public class ErrorDialog extends JDialog {
         ResourceMap map = c.getResourceMap(ErrorDialog.class);
 
         setTitle(map.getString("ErrorDialog.JDialog." + title + ".Title"));
-        errorMessageLabel.setText(map.getString("ErrorDialog.JLabel.Message." + message + ".Text"));
+        
+        String msg = map.getString("ErrorDialog.JLabel.Message." + message + ".Text");
+        
+        if(msg != null && msg.length() > 0) {
+            errorMessageLabel.setText(msg);
+        } else {
+            errorMessageLabel.setText(message);
+        }
+        
         routing.RoutingDemo.getApplication().show(this);
     }
 

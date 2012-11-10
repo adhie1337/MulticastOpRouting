@@ -8,7 +8,7 @@ public class Session {
 
 	public int id;
 
-	public int weight = 1;
+	public int weight;
 
 	public int sourceId;
 
@@ -19,11 +19,12 @@ public class Session {
 	public Session() {
 		id = nextSessionId++;
 
+		weight = 1;
 		destinationIds = new Vector<Integer>();
 	}
 
 	@Override
 	public String toString() {
-		return (name != null ? name : "unnamed session") + " (# " + id + ")";
+		return (name != null ? name : "unnamed session") + " (#" + id + ", w: " + weight + ")";
 	}
 }

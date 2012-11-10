@@ -38,6 +38,10 @@ public class RoutingDemo extends SingleFrameApplication implements ClipboardOwne
     public static RoutingDemo getApplication() {
         return Application.getInstance(RoutingDemo.class);
     }
+    
+    public static MainFrame getMF() {
+    	return (MainFrame)getApplication().getMainView();
+    }
 
     /**
      * lostOwnership listener

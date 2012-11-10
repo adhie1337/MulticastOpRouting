@@ -110,7 +110,7 @@ public class SessionUtil {
 					}
 				} while (i != line.size());
 
-				retVal.name = label;
+				retVal.name = label.trim();
 			}
 		} else {
 			// Error?

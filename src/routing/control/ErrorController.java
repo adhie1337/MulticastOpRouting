@@ -21,7 +21,7 @@ public class ErrorController {
     }
 
     /**
-     * Shows an errióor dialog with the specified contetns.
+     * Shows an error dialog with the specified contetns.
      * @param message the message to show in the dialog
      * @param title the title of the dialog
      */

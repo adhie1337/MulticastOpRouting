@@ -41,8 +41,8 @@ public class EdgePropertiesDialog extends JDialog {
 		_edge = e;
 
 		if (_edge != null) {
-			weightField.setText(NumberFormat.getNumberInstance(Locale.US).format(
-					_edge.weight));
+			weightField.setText(NumberFormat.getNumberInstance(Locale.US)
+					.format(_edge.weight));
 		}
 	}
 
@@ -53,7 +53,8 @@ public class EdgePropertiesDialog extends JDialog {
 	}
 
 	private void initializeView() {
-		ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
+		ApplicationContext c = Application.getInstance(RoutingDemo.class)
+				.getContext();
 		ActionMap actionMap = c.getActionMap(EdgePropertiesDialog.class, this);
 		ResourceMap rm = c.getResourceMap(EdgePropertiesDialog.class);
 
@@ -109,11 +110,11 @@ public class EdgePropertiesDialog extends JDialog {
 	@Action
 	public void commitChangesAction() {
 		try {
-			_edge.weight = Double.parseDouble(weightField.getText());
+			_edge.getNet().setWeight(_edge.from.id, _edge.to.id,
+					Double.parseDouble(weightField.getText()));
 		} catch (Exception e) {
 			ErrorController.showError("Invalid weight format!", "Error");
 		}
-
 		dispose();
 
 		RoutingDemo.getApplication().getMainFrame().repaint();

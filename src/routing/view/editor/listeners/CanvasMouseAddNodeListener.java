@@ -1,8 +1,10 @@
 package routing.view.editor.listeners;
 
 import java.awt.event.MouseEvent;
-import routing.control.entities.Graph;
+
 import routing.control.entities.Node;
+import routing.control.entities.Graph;
+
 import routing.view.editor.DocumentEditor;
 
 /**

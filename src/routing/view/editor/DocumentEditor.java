@@ -17,7 +17,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import routing.control.Document;
-import routing.control.entities.Entity;
+import routing.control.entities.Node;
 import routing.view.editor.listeners.CanvasMouseSetPropertiesListener;
 
 /**
@@ -75,7 +75,7 @@ public class DocumentEditor extends JPanel {
 	public JScrollPane canvasContainer;
 	public Canvas canvas;
 
-	private Map<String, Entity> _selectedEntities;
+	private Map<Integer, Node> _selectedEntities;
 
 	private MouseAdapter _currentMouseListener;
 	private EditorMode _editorMode;
@@ -127,7 +127,7 @@ public class DocumentEditor extends JPanel {
 	 */
 	public DocumentEditor(Document document) {
 
-		_selectedEntities = new HashMap<String, Entity>();
+		_selectedEntities = new HashMap<Integer, Node>();
 
 		_document = document;
 
@@ -194,8 +194,8 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param value
 	 */
-	public List<Entity> getSelection() {
-		return new LinkedList<Entity>(_selectedEntities.values());
+	public List<Node> getSelection() {
+		return new LinkedList<Node>(_selectedEntities.values());
 	}
 
 	/**
@@ -204,8 +204,8 @@ public class DocumentEditor extends JPanel {
 	 * @param selection
 	 *            the entity that will be the only selected one.
 	 */
-	public void setSelection(Entity selection) {
-		Collection<Entity> newSelection = new LinkedList<Entity>();
+	public void setSelection(Node selection) {
+		Collection<Node> newSelection = new LinkedList<Node>();
 		newSelection.add(selection);
 		setSelection(newSelection);
 	}
@@ -216,13 +216,13 @@ public class DocumentEditor extends JPanel {
 	 * @param selection
 	 *            the entities to select.
 	 */
-	public void setSelection(Collection<Entity> selection) {
-		Iterator<Entity> it = _selectedEntities.values().iterator();
+	public void setSelection(Collection<Node> selection) {
+		Iterator<Node> it = _selectedEntities.values().iterator();
 
-		List<Entity> removeAbles = new LinkedList<Entity>();
+		List<Node> removeAbles = new LinkedList<Node>();
 
 		while (it.hasNext()) {
-			Entity e = it.next();
+			Node e = it.next();
 
 			if (selection.contains(e)) {
 				selection.remove(e);
@@ -234,16 +234,16 @@ public class DocumentEditor extends JPanel {
 		it = removeAbles.iterator();
 
 		while (it.hasNext()) {
-			Entity e = it.next();
-			_selectedEntities.remove(e.sign);
+			Node e = it.next();
+			_selectedEntities.remove(e.id);
 			e.selected = false;
 		}
 
 		it = selection.iterator();
 
 		while (it.hasNext()) {
-			Entity e = it.next();
-			_selectedEntities.put(e.sign, e);
+			Node e = it.next();
+			_selectedEntities.put(e.id, e);
 			e.selected = true;
 		}
 
@@ -255,8 +255,8 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param selection
 	 */
-	public void addToSelection(Entity selection) {
-		_selectedEntities.put(selection.sign, selection);
+	public void addToSelection(Node selection) {
+		_selectedEntities.put(selection.id, selection);
 		selection.selected = true;
 	}
 
@@ -265,12 +265,12 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param selection
 	 */
-	public void addToSelection(Collection<Entity> selection) {
-		Iterator<Entity> it = selection.iterator();
+	public void addToSelection(Collection<Node> selection) {
+		Iterator<Node> it = selection.iterator();
 
 		while (it.hasNext()) {
-			Entity e = it.next();
-			_selectedEntities.put(e.sign, e);
+			Node e = it.next();
+			_selectedEntities.put(e.id, e);
 			e.selected = true;
 		}
 
@@ -282,9 +282,9 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param selection
 	 */
-	public void removeFromSelection(Entity selection) {
-		if (_selectedEntities.containsKey(selection.sign)) {
-			_selectedEntities.remove(selection.sign);
+	public void removeFromSelection(Node selection) {
+		if (_selectedEntities.containsKey(selection.id)) {
+			_selectedEntities.remove(selection.id);
 			selection.selected = false;
 		}
 	}
@@ -294,12 +294,12 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param selection
 	 */
-	public void removeFromSelection(Collection<Entity> selection) {
-		Iterator<Entity> it = selection.iterator();
+	public void removeFromSelection(Collection<Node> selection) {
+		Iterator<Node> it = selection.iterator();
 
 		while (it.hasNext()) {
-			Entity e = it.next();
-			_selectedEntities.remove(e.sign);
+			Node e = it.next();
+			_selectedEntities.remove(e.id);
 			e.selected = false;
 		}
 
@@ -312,8 +312,8 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param selection
 	 */
-	public void addToOrRemoveFromSelection(Entity selection) {
-		if (_selectedEntities.containsKey(selection.sign))
+	public void addToOrRemoveFromSelection(Node selection) {
+		if (_selectedEntities.containsKey(selection.id))
 			removeFromSelection(selection);
 		else
 			addToSelection(selection);
@@ -325,17 +325,17 @@ public class DocumentEditor extends JPanel {
 	 * 
 	 * @param selection
 	 */
-	public void addToOrRemoveFromSelection(Collection<Entity> selection) {
-		Iterator<Entity> it = selection.iterator();
+	public void addToOrRemoveFromSelection(Collection<Node> selection) {
+		Iterator<Node> it = selection.iterator();
 
 		while (it.hasNext()) {
-			Entity e = it.next();
+			Node e = it.next();
 
-			if (_selectedEntities.containsKey(e.sign)) {
-				_selectedEntities.remove(e.sign);
+			if (_selectedEntities.containsKey(e.id)) {
+				_selectedEntities.remove(e.id);
 				e.selected = false;
 			} else {
-				_selectedEntities.put(e.sign, e);
+				_selectedEntities.put(e.id, e);
 				e.selected = true;
 			}
 		}

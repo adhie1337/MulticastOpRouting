@@ -40,7 +40,7 @@ public class NodePropertiesDialog extends JDialog {
 		_node = t;
 
 		if (_node != null) {
-			nameField.setText(_node.sign);
+			nameField.setText(Integer.toString(_node.id));
 			labelField.setText(_node.label);
 		}
 	}
@@ -126,12 +126,12 @@ public class NodePropertiesDialog extends JDialog {
 
 	@Action
 	public void commitChangesAction() {
-		_node.sign = nameField.getText();
 		_node.label = labelField.getText();
 
 		try {
+			_node.id = Integer.parseInt(nameField.getText());
 		} catch (Exception e) {
-			ErrorController.showError("Invalid format!", "Error");
+			ErrorController.showError("Invalid id format!", "Error");
 		}
 
 		dispose();

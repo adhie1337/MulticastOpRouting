@@ -3,7 +3,7 @@ package routing.control;
 import java.util.Collection;
 import java.util.LinkedList;
 import org.jdesktop.application.Action;
-import routing.control.entities.Entity;
+import routing.control.entities.Node;
 import routing.control.entities.Graph;
 import routing.util.GraphUtil;
 import routing.view.MainFrame;
@@ -146,8 +146,8 @@ public class EditorController {
         MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
         Graph net = GraphUtil.fromClipboard();
         mainFrame.getCurrentPage().net.addAll(net);
-        Collection<Entity> selected = new LinkedList<Entity>();
-        selected.addAll(net.nodes.values());
+        Collection<Node> selected = new LinkedList<Node>();
+        selected.addAll(net.getNodeList());
         mainFrame.getCurrentEditor().setSelection(selected);
         mainFrame.getCurrentEditor().repaint();
     }
@@ -162,8 +162,8 @@ public class EditorController {
         Graph net = mainFrame.getCurrentPage().net.getSelection(false);
         net.translate(Canvas.TRANSITION_WIDTH, Canvas.TRANSITION_WIDTH);
         mainFrame.getCurrentPage().net.addAll(net);
-        Collection<Entity> selected = new LinkedList<Entity>();
-        selected.addAll(net.nodes.values());
+        Collection<Node> selected = new LinkedList<Node>();
+        selected.addAll(net.getNodeList());
         mainFrame.getCurrentEditor().setSelection(selected);
         mainFrame.getCurrentEditor().repaint();
     }

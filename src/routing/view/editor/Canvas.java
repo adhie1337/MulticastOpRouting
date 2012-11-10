@@ -13,9 +13,8 @@ import java.util.Locale;
 
 import routing.control.entities.Edge;
 import routing.control.entities.Graph;
-import routing.control.entities.Node;
 import javax.swing.JPanel;
-import routing.control.entities.Entity;
+import routing.control.entities.Node;
 
 /**
  * The canvas class. Handles the drawing of the Petri net being currently
@@ -74,8 +73,8 @@ public class Canvas extends JPanel {
 
 	public Node nodeToAdd = null;
 
-	public Entity edgeToAddStart;
-	public Entity edgeToAddFinish;
+	public Node edgeToAddStart;
+	public Node edgeToAddFinish;
 	public java.awt.Point edgeToAddEnd;
 
 	/**
@@ -107,13 +106,13 @@ public class Canvas extends JPanel {
 		((Graphics2D) g).setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_BEVEL));
 
-		Iterator<Node> nodeIt = _net.nodes.values().iterator();
+		Iterator<Node> nodeIt = _net.getNodeList().iterator();
 
 		while (nodeIt.hasNext()) {
 			drawNode(nodeIt.next(), g.create());
 		}
 
-		Iterator<Edge> edgeIt = _net.edges.iterator();
+		Iterator<Edge> edgeIt = _net.getEdgeList().iterator();
 
 		((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_BEVEL));
@@ -151,7 +150,8 @@ public class Canvas extends JPanel {
 					(float) 1.0);
 
 			if (edgeToAddFinish != null) {
-				c = new Color((float) 0.0, (float) 0.0, (float) 1.0, (float) 1.0);
+				c = new Color((float) 0.0, (float) 0.0, (float) 1.0,
+						(float) 1.0);
 
 				Edge edgeToDraw = new Edge(_net);
 				edgeToDraw.from = edgeToAddStart;
@@ -161,15 +161,18 @@ public class Canvas extends JPanel {
 			} else if (edgeToAddEnd != null) {
 				java.awt.Point start = null;
 
-				if (edgeToAddStart instanceof Node) {
-					start = getCorrectedPointFromNode(edgeToAddStart.x,
-							edgeToAddStart.y, edgeToAddEnd.x, edgeToAddEnd.y,
-							NODE_RADIUS - 1);
-				}
+				start = getCorrectedPointFromNode(edgeToAddStart.x,
+						edgeToAddStart.y, edgeToAddEnd.x, edgeToAddEnd.y,
+						NODE_RADIUS - 1);
 
 				g.setColor(c);
-				drawArrow((Graphics2D) g, start.x, start.y, edgeToAddEnd.x,
-						edgeToAddEnd.y);
+
+				if (false) {
+					drawArrow((Graphics2D) g, start.x, start.y, edgeToAddEnd.x,
+							edgeToAddEnd.y);
+				} else {
+					g.drawLine(start.x, start.y, edgeToAddEnd.x, edgeToAddEnd.y);
+				}
 			}
 		}
 	}
@@ -201,9 +204,10 @@ public class Canvas extends JPanel {
 
 		/*
 		 * if(p.weight > 0) { String lbl =
-		 * NumberFormat.getNumberInstance(Locale.US).format(p.weight); Graphics g2 =
-		 * g.create(); g2.setFont(g2.getFont().deriveFont((float)(NODE_RADIUS *
-		 * 2 / 3 * _zoom)));
+		 * NumberFormat.getNumberInstance(Locale.US).format(p.weight); Graphics
+		 * g2 = g.create();
+		 * g2.setFont(g2.getFont().deriveFont((float)(NODE_RADIUS * 2 / 3 *
+		 * _zoom)));
 		 * 
 		 * FontMetrics m = g2.getFontMetrics();
 		 * 
@@ -234,43 +238,38 @@ public class Canvas extends JPanel {
 		int toX = 0;
 		int toY = 0;
 
-		if (e.from instanceof Node) {
-			java.awt.Point fromPoint = getCorrectedPointFromNode(fromPos.x,
-					fromPos.y, toPos.x, toPos.y, NODE_RADIUS - 1);
-			fromX = fromPoint.x;
-			fromY = fromPoint.y;
-		}
+		java.awt.Point fromPoint = getCorrectedPointFromNode(fromPos.x,
+				fromPos.y, toPos.x, toPos.y, NODE_RADIUS - 1);
+		fromX = fromPoint.x;
+		fromY = fromPoint.y;
 
-		if (e.to instanceof Node) {
-			java.awt.Point toPoint = getCorrectedPointFromNode(toPos.x,
-					toPos.y, fromPos.x, fromPos.y, NODE_RADIUS + 1);
-			toX = toPoint.x;
-			toY = toPoint.y;
-		}
+		java.awt.Point toPoint = getCorrectedPointFromNode(toPos.x, toPos.y,
+				fromPos.x, fromPos.y, NODE_RADIUS + 1);
+		toX = toPoint.x;
+		toY = toPoint.y;
 
-		if(drawArrow) {
+		if (drawArrow) {
 			drawArrow((Graphics2D) g.create(), fromX, fromY, toX, toY);
-		}
-		else {
+		} else {
 			g.drawLine(fromX, fromY, toX, toY);
 		}
 
 		Graphics g2 = g.create();
 		g2.setFont(g2.getFont().deriveFont(
 				(float) (TRANSITION_WIDTH / 2 * _zoom)));
-		String weightString = NumberFormat.getInstance(Locale.US).format(e.weight);
+		String weightString = NumberFormat.getInstance(Locale.US).format(
+				e.weight);
 
 		float ratio = (float) Math.abs(fromX - toX)
 				/ ((float) Math.abs(fromY - toY) + (float) 0.1);
-		float flip = fromX < toX && fromY < toY || fromX > toX
-				&& fromY > toY ? (float) -1.0 : (float) 1.0;
+		float flip = fromX < toX && fromY < toY || fromX > toX && fromY > toY ? (float) -1.0
+				: (float) 1.0;
 
-		g2.drawString(weightString, (int) ((fromX + toX) / 2
-				- TRANSITION_WIDTH / 4 * _zoom + (1 / ratio > 1.5 ? 1
-				: 1 / ratio) * TRANSITION_WIDTH / 3 * _zoom),
-				(int) ((fromY + toY) / 2 + flip * TRANSITION_WIDTH / 4
-						* _zoom + (ratio > 1.5 ? 1 : ratio)
-						* TRANSITION_WIDTH / 3 * _zoom));
+		g2.drawString(weightString, (int) ((fromX + toX) / 2 - TRANSITION_WIDTH
+				/ 4 * _zoom + (1 / ratio > 1.5 ? 1 : 1 / ratio)
+				* TRANSITION_WIDTH / 3 * _zoom), (int) ((fromY + toY) / 2
+				+ flip * TRANSITION_WIDTH / 4 * _zoom + (ratio > 1.5 ? 1
+				: ratio) * TRANSITION_WIDTH / 3 * _zoom));
 	}
 
 	void drawArrow(Graphics2D g, int x1, int y1, int x2, int y2) {
@@ -322,13 +321,13 @@ public class Canvas extends JPanel {
 	public void calculateMinSize() {
 		Dimension minSize = new Dimension();
 
-		Iterator<Node> nodeIt = _net.nodes.values().iterator();
+		Iterator<Node> nodeIt = _net.getNodeList().iterator();
 
 		double translateX = 0.0;
 		double translateY = 0.0;
 
 		while (nodeIt.hasNext()) {
-			Entity e = nodeIt.next();
+			Node e = nodeIt.next();
 
 			if (e.x - NODE_RADIUS - 5 < translateX) {
 				translateX = e.x - NODE_RADIUS - 5;
@@ -359,7 +358,7 @@ public class Canvas extends JPanel {
 		getParent().revalidate();
 	}
 
-	private java.awt.Point getCorrectedPosition(Entity e) {
+	private java.awt.Point getCorrectedPosition(Node e) {
 		java.awt.Point p = new java.awt.Point((int) e.x, (int) e.y);
 
 		if (e.selected && _editor.isBeingDraggedAndDropped()) {

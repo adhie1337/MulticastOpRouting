@@ -6,23 +6,52 @@ import routing.util.CompareUtil;
  *
  * @author PIAPAAI.ELTE
  */
-public class Node extends Entity implements Cloneable {
+public class Node {
 
-    public Node(Graph net) {
-        this._net = net;
+    protected Graph _net;
+
+    public double x;
+    public double y;
+
+    public int id;
+    public String label;
+
+    public Boolean selected;
+
+    public static int nextNodeId = 1;
+
+    public Node() {
+        selected = false;
+
+        id = nextNodeId;
+        ++nextNodeId;
     }
 
+    public Node(Graph g) {
+        selected = false;
+
+        id = nextNodeId;
+        ++nextNodeId;
+        
+        _net = g;
+    }
 
     @Override
     public boolean equals(Object other) {
         return (other instanceof Node)
-                && super.equals(other);
+                && CompareUtil.compare(((Node)other).x, x)
+                && CompareUtil.compare(((Node)other).y, y)
+                && CompareUtil.compare(((Node)other).id, id)
+                && CompareUtil.compare(((Node)other).label, label);
     }
 
     @Override
     public int hashCode() {
-        int hash = super.hashCode();
-        //hash = 59 * hash + (new Integer(this.weight).hashCode());
+        int hash = 7;
+        hash = 47 * hash + (new Double(this.x).hashCode());
+        hash = 47 * hash + (new Double(this.y).hashCode());
+        hash = 47 * hash + (new Integer(this.id).hashCode());
+        hash = 47 * hash + (this.label != null ? this.label.hashCode() : 0);
         return hash;
     }
 
@@ -33,13 +62,11 @@ public class Node extends Entity implements Cloneable {
 
         retVal.label = label;
         retVal.selected = selected;
-        retVal.sign = sign;
+        retVal.id = id;
         retVal.x = x;
         retVal.y = y;
-        //retVal.weight = weight;
 
         return retVal;
     }
-
 
 }

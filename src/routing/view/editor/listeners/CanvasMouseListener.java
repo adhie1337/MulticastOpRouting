@@ -8,9 +8,8 @@ import java.awt.event.MouseWheelEvent;
 import java.util.Iterator;
 import javax.swing.JScrollBar;
 import routing.control.entities.Edge;
-import routing.control.entities.Entity;
-import routing.control.entities.Graph;
 import routing.control.entities.Node;
+import routing.control.entities.Graph;
 import routing.view.editor.Canvas;
 import routing.view.editor.DocumentEditor;
 
@@ -75,18 +74,16 @@ public abstract class CanvasMouseListener extends MouseAdapter {
 						- getXAt(p2.y * z, p2.x * z, p1.y * z, p1.x * z, p.y)) <= 15);
 	}
 
-	protected Boolean isEntityAtPoint(Entity e, java.awt.Point p) {
+	protected Boolean isEntityAtPoint(Node e, java.awt.Point p) {
 		double z = _editor.canvas.getZoom();
-		if (e instanceof routing.control.entities.Node
-				&& Math.pow(e.x * z - p.getX(), 2)
-						+ Math.pow(e.y * z - p.getY(), 2) <= Math.pow(
-						(Canvas.NODE_RADIUS + 1) * z, 2)) {
+		if (Math.pow(e.x * z - p.getX(), 2) + Math.pow(e.y * z - p.getY(), 2) <= 
+				Math.pow((Canvas.NODE_RADIUS + 1) * z, 2)) {
 			return true;
 		}
 		return false;
 	}
 
-	protected Boolean isEntityInRect(Entity e, java.awt.Point p, Dimension d) {
+	protected Boolean isEntityInRect(Node e, java.awt.Point p, Dimension d) {
 		double z = _editor.canvas.getZoom();
 		return e.x * z >= p.getX() && e.x * z <= p.getX() + d.width
 				&& e.y * z >= p.getY() && e.y * z <= p.getY() + d.height;
@@ -148,10 +145,9 @@ public abstract class CanvasMouseListener extends MouseAdapter {
 				: null;
 
 		if (net != null) {
-			Entity selected = null;
+			Node selected = null;
 
-			Iterator<routing.control.entities.Node> nodeIt = net.nodes
-					.values().iterator();
+			Iterator<Node> nodeIt = net.getNodeList().iterator();
 
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
@@ -214,10 +210,10 @@ public abstract class CanvasMouseListener extends MouseAdapter {
 			_editor.dragAndDropBegin = null;
 			_editor.dragAndDropDimension = null;
 
-			Iterator<Entity> it = _editor.getSelection().iterator();
+			Iterator<Node> it = _editor.getSelection().iterator();
 
 			while (it.hasNext()) {
-				Entity ent = it.next();
+				Node ent = it.next();
 
 				ent.x += dnd.width;
 				ent.y += dnd.height;

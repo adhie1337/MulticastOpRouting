@@ -3,9 +3,8 @@ package routing.view.editor.listeners;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import routing.control.entities.Edge;
-import routing.control.entities.Entity;
-import routing.control.entities.Graph;
 import routing.control.entities.Node;
+import routing.control.entities.Graph;
 import routing.view.editor.DocumentEditor;
 
 /**
@@ -38,9 +37,9 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 
 		if (net != null
 				&& _editor.getEditorMode() == DocumentEditor.EditorMode.AddEdge) {
-			Entity found = null;
+			Node found = null;
 
-			Iterator<Node> nodeIt = net.nodes.values().iterator();
+			Iterator<Node> nodeIt = net.getNodeList().iterator();
 
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
@@ -73,9 +72,9 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 
 		if (net != null && _editor.canvas.edgeToAddStart != null
 				&& _editor.getEditorMode() == DocumentEditor.EditorMode.AddEdge) {
-			Entity found = null;
+			Node found = null;
 
-			Iterator<Node> nodeIt = net.nodes.values().iterator();
+			Iterator<Node> nodeIt = net.getNodeList().iterator();
 
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
@@ -110,16 +109,10 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 				&& _editor.getDocument().net != null ? _editor.getDocument().net
 				: null;
 
-		if (net != null) {
-			if (_editor.canvas.edgeToAddStart != null
-					&& _editor.canvas.edgeToAddFinish != null){
-					//&& !_editor.canvas.edgeToAddStart.getClass().equals(
-					//		_editor.canvas.edgeToAddFinish.getClass())) {
-				Edge newEdge = new Edge(net);
-				newEdge.from = _editor.canvas.edgeToAddStart;
-				newEdge.to = _editor.canvas.edgeToAddFinish;
-				net.edges.add(newEdge);
-			}
+		if (net != null && _editor.canvas.edgeToAddStart != null
+				&& _editor.canvas.edgeToAddFinish != null) {
+			net.setWeight(_editor.canvas.edgeToAddStart.id,
+					_editor.canvas.edgeToAddFinish.id, 1);
 		}
 
 		_editor.canvas.edgeToAddStart = null;
@@ -128,5 +121,4 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 
 		super.mouseReleased(e);
 	}
-
 }

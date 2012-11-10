@@ -3,9 +3,9 @@ package routing.view.editor.listeners;
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
 import routing.control.entities.Edge;
-import routing.control.entities.Entity;
-import routing.control.entities.Graph;
 import routing.control.entities.Node;
+import routing.control.entities.Graph;
+
 import routing.view.editor.DocumentEditor;
 import routing.view.editor.EdgePropertiesDialog;
 import routing.view.editor.NodePropertiesDialog;
@@ -43,10 +43,10 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 				: null;
 
 		if (net != null) {
-			Entity selected = null;
+			Node selected = null;
 			Edge selectedEdge = null;
 
-			Iterator<Edge> edgeIt = net.edges.iterator();
+			Iterator<Edge> edgeIt = net.getEdgeList().iterator();
 
 			while (edgeIt.hasNext()) {
 				Edge actEdge = edgeIt.next();
@@ -58,7 +58,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 
 			System.out.println("");
 
-			Iterator<Node> nodeIt = net.nodes.values().iterator();
+			Iterator<Node> nodeIt = net.getNodeList().iterator();
 
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
@@ -69,15 +69,13 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 			}
 
 			if (selected != null) {
-				if (selected instanceof Node) {
-					if (nodeProperties == null) {
-						nodeProperties = new NodePropertiesDialog(RoutingDemo
-								.getApplication().getMainFrame());
-					}
-
-					nodeProperties.setNode((Node) selected);
-					RoutingDemo.getApplication().show(nodeProperties);
+				if (nodeProperties == null) {
+					nodeProperties = new NodePropertiesDialog(RoutingDemo
+							.getApplication().getMainFrame());
 				}
+
+				nodeProperties.setNode((Node) selected);
+				RoutingDemo.getApplication().show(nodeProperties);
 			} else if (selectedEdge != null) {
 				if (edgeProperties == null) {
 					edgeProperties = new EdgePropertiesDialog(RoutingDemo

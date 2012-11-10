@@ -5,11 +5,15 @@ import java.util.LinkedList;
 import org.jdesktop.application.Action;
 import routing.control.entities.Node;
 import routing.control.entities.Graph;
+import routing.control.entities.Session;
 import routing.util.GraphUtil;
 import routing.view.MainFrame;
 import routing.view.Toolbar;
 import routing.view.editor.Canvas;
 import routing.view.editor.DocumentEditor;
+import routing.view.editor.NodePropertiesDialog;
+import routing.view.editor.SessionEditorDialog;
+import routing.view.editor.SessionEditorDialog.EditorState;
 import routing.RoutingDemo;
 
 /**
@@ -132,9 +136,14 @@ public class EditorController {
     @Action
     public void cutAction()
     {
-        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
-        GraphUtil.toClipBoard(mainFrame.getCurrentPage().net.getSelection(true));
-        mainFrame.getCurrentEditor().repaint();
+        if(DocumentController.getInstance().getCurrentDocument().sessions.size() == 0) {
+	        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
+	        GraphUtil.toClipBoard(mainFrame.getCurrentPage().net.getSelection(true));
+	        mainFrame.getCurrentEditor().repaint();
+	    } else {
+	    	copyAction();
+	    	ErrorController.showError("You can't delete nodes when there are sessions!", "Error");
+	    }
     }
 
     /**
@@ -143,13 +152,17 @@ public class EditorController {
     @Action
     public void pasteAction()
     {
-        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
-        Graph net = GraphUtil.fromClipboard();
-        mainFrame.getCurrentPage().net.addAll(net);
-        Collection<Node> selected = new LinkedList<Node>();
-        selected.addAll(net.getNodeList());
-        mainFrame.getCurrentEditor().setSelection(selected);
-        mainFrame.getCurrentEditor().repaint();
+        if(DocumentController.getInstance().getCurrentDocument().sessions.size() == 0) {
+	        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
+	        Graph net = GraphUtil.fromClipboard();
+	        mainFrame.getCurrentPage().net.addAll(net);
+	        Collection<Node> selected = new LinkedList<Node>();
+	        selected.addAll(net.getNodeList());
+	        mainFrame.getCurrentEditor().setSelection(selected);
+	        mainFrame.getCurrentEditor().repaint();
+	    } else {
+	    	ErrorController.showError("You can't add nodes when there are sessions!", "Error");
+	    }
     }
 
     /**
@@ -158,14 +171,18 @@ public class EditorController {
     @Action
     public void duplicateAction()
     {
-        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
-        Graph net = mainFrame.getCurrentPage().net.getSelection(false);
-        net.translate(Canvas.TRANSITION_WIDTH, Canvas.TRANSITION_WIDTH);
-        mainFrame.getCurrentPage().net.addAll(net);
-        Collection<Node> selected = new LinkedList<Node>();
-        selected.addAll(net.getNodeList());
-        mainFrame.getCurrentEditor().setSelection(selected);
-        mainFrame.getCurrentEditor().repaint();
+        if(DocumentController.getInstance().getCurrentDocument().sessions.size() == 0) {
+	        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
+	        Graph net = mainFrame.getCurrentPage().net.getSelection(false);
+	        net.translate(Canvas.TRANSITION_WIDTH, Canvas.TRANSITION_WIDTH);
+	        mainFrame.getCurrentPage().net.addAll(net);
+	        Collection<Node> selected = new LinkedList<Node>();
+	        selected.addAll(net.getNodeList());
+	        mainFrame.getCurrentEditor().setSelection(selected);
+	        mainFrame.getCurrentEditor().repaint();
+	    } else {
+	    	ErrorController.showError("You can't add nodes when there are sessions!", "Error");
+	    }
     }
 
     /**
@@ -174,10 +191,34 @@ public class EditorController {
     @Action
     public void deleteAction()
     {
-        MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
-        mainFrame.getCurrentPage().net.getSelection(true);
-        mainFrame.getCurrentEditor().repaint();
+        if(DocumentController.getInstance().getCurrentDocument().sessions.size() == 0) {
+            MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
+	        mainFrame.getCurrentPage().net.getSelection(true);
+	        mainFrame.getCurrentEditor().repaint();
+        } else {
+        	ErrorController.showError("You can't delete nodes when there are sessions!", "Error");
+        }
     }
 
+    private SessionEditorDialog sessionEditor;
+    
+    @Action
+    public void showSessionEditorAction() {
+		if (sessionEditor == null) {
+			sessionEditor = new SessionEditorDialog(RoutingDemo
+					.getApplication().getMainFrame());
+		}
+		
+		sessionEditor.setState(EditorState.SelectSourceNode);
 
+		Session s = new Session();
+		s.id = 42;
+		s.name = "session 1";
+		s.sourceId = 1;
+		s.destinationIds.add(2);
+		s.destinationIds.add(3);
+		s.weight = 1;
+		sessionEditor.setSession(s);
+		RoutingDemo.getApplication().show(sessionEditor);
+    }
 }

@@ -25,7 +25,7 @@ public class Graph {
 
 	private List<Edge> edgeList;
 
-	private Map<Integer, Map<Integer, Double>> weightMap;
+	private HashMap<Integer, HashMap<Integer, Double>> weightMap;
 
 	public Node addNode(Node value) {
 		
@@ -58,7 +58,7 @@ public class Graph {
 			Map<Integer, Double> edges = weightMap.get(id);
 			
 			if(edges != null) {
-				Vector<Integer> ids = new Vector<>();
+				Vector<Integer> ids = new Vector<Integer>();
 				
 				for(Entry<Integer, Double> ent : edges.entrySet()) {
 					ids.add(ent.getKey());
@@ -218,9 +218,9 @@ public class Graph {
 	}
 
 	public Graph() {
-		nodes = new HashMap<>();
+		nodes = new HashMap<Integer, Node>();
 		edgeList = new ArrayList<Edge>();
-		weightMap = new HashMap<>();
+		weightMap = new HashMap<Integer, HashMap<Integer, Double>>();
 	}
 
 	@Override

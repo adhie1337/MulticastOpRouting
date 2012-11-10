@@ -217,7 +217,7 @@ public class GraphUtil {
 	 *            the Petri net object
 	 * @return the net formatted as string
 	 */
-	public static String fromPetriNet(Graph value) {
+	public static String fromObject(Graph value) {
 		String retVal = "";
 
 		Iterator<Node> it = value.getNodeList().iterator();
@@ -232,7 +232,7 @@ public class GraphUtil {
 			retVal += toString(ite.next()) + "\n";
 		}
 
-		retVal += "h " + value.name;
+		retVal += "h " + value.name + " n\n";
 
 		return retVal;
 	}
@@ -308,7 +308,7 @@ public class GraphUtil {
 		net.translate(Canvas.TRANSITION_WIDTH, Canvas.TRANSITION_WIDTH);
 		net.name = "Clipboard contents";
 
-		c.setContents(new StringSelection(fromPetriNet(net)),
+		c.setContents(new StringSelection(fromObject(net)),
 				(RoutingDemo) RoutingDemo.getInstance());
 	}
 

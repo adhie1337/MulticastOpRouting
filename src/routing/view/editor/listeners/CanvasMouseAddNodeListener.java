@@ -2,9 +2,11 @@ package routing.view.editor.listeners;
 
 import java.awt.event.MouseEvent;
 
+import routing.RoutingDemo;
 import routing.control.entities.Node;
 import routing.control.entities.Graph;
 
+import routing.view.MainFrame;
 import routing.view.editor.DocumentEditor;
 
 /**
@@ -97,6 +99,9 @@ public class CanvasMouseAddNodeListener extends CanvasMouseListener {
             _editor.canvas.nodeToAdd.y = (double)e.getY() / _editor.canvas.getZoom();
 
             net.addNode(_editor.canvas.nodeToAdd);
+            
+            MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
+            mainFrame.sessionPanel.checkActionsState();
 
             _editor.canvas.nodeToAdd = null;
             _editor.canvas.calculateMinSize();

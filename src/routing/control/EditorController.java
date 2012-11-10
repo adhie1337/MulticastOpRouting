@@ -177,6 +177,7 @@ public class EditorController {
         MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
         mainFrame.getCurrentPage().net.getSelection(true);
         mainFrame.getCurrentEditor().repaint();
+        mainFrame.sessionPanel.checkActionsState();
     }
 
 

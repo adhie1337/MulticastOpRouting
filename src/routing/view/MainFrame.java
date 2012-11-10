@@ -1,9 +1,13 @@
 package routing.view;
 
+import java.awt.BorderLayout;
+
 import routing.view.editor.DocumentEditor;
 import javax.swing.event.ChangeEvent;
 import javax.swing.ActionMap;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 import org.jdesktop.application.Action;
@@ -23,6 +27,8 @@ public class MainFrame extends FrameView implements ChangeListener {
     private AboutDialog aboutDialog;
 
     public JTabbedPane tabbedPane;
+    
+    public SessionPanel sessionPanel;
 
     private DocumentEditor.EditorMode _currentMode = DocumentEditor.EditorMode.Selection;
 
@@ -50,6 +56,7 @@ public class MainFrame extends FrameView implements ChangeListener {
         int i = tabbedPane.indexOfComponent(panel);
         tabbedPane.setTitleAt(i, document.documentName);
         tabbedPane.setSelectedIndex(i);
+        sessionPanel.setDocument(document);
 
         checkActionsState();
 
@@ -87,6 +94,7 @@ public class MainFrame extends FrameView implements ChangeListener {
             if(editor != null && editor.getDocument().equals(document))
             {
                 tabbedPane.setSelectedIndex(i);
+                sessionPanel.setDocument(document);
                 checkActionsState();
 
                 return editor;
@@ -179,6 +187,8 @@ public class MainFrame extends FrameView implements ChangeListener {
         {
             DocumentController.getInstance().changeCurrentFileAction();
         }
+        
+        sessionPanel.setDocument(getCurrentPage());
     }
 
     private void initFrame() {
@@ -186,8 +196,14 @@ public class MainFrame extends FrameView implements ChangeListener {
 
         tabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.addChangeListener(this);
-
-        setComponent(tabbedPane);
+        
+        sessionPanel = new SessionPanel();
+        
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        mainPanel.add(sessionPanel, BorderLayout.EAST);
+        setComponent(mainPanel);
 
         setToolBar(new Toolbar(this));
     }

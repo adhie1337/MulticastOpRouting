@@ -108,14 +108,14 @@ public class Document {
 					sessions = SessionUtil.fromString(m.group(2));
 				} else {
 					net = GraphUtil.fromString(_fileContents);
-					sessions = new Vector<>();
+					sessions = new Vector<Session>();
 				}
 			} catch (ApplicationException e) {
 				ErrorController.showError(e.getMessage(), e.getLevel());
 			}
 		} else {
 			net = new Graph();
-			sessions = new Vector<>();
+			sessions = new Vector<Session>();
 		}
 	}
 

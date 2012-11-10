@@ -15,7 +15,7 @@ public class SessionUtil {
 
 	public static Vector<Session> fromString(String value)
 			throws ApplicationException {
-		Vector<Session> retVal = new Vector<>();
+		Vector<Session> retVal = new Vector<Session>();
 
 		BufferedReader stringReader = new BufferedReader(
 				new StringReader(value));

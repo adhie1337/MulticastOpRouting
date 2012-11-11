@@ -14,6 +14,7 @@ import routing.view.MainFrame;
 import routing.view.Toolbar;
 import routing.view.editor.Canvas;
 import routing.view.editor.DocumentEditor;
+import routing.view.editor.RenderInfo;
 import routing.view.editor.DocumentEditor.EditorMode;
 import routing.view.editor.SessionEditorDialog;
 import routing.view.editor.SessionEditorDialog.EditorState;
@@ -29,14 +30,14 @@ public class EditorController {
 	 */
 	private static EditorController _instance;
 
-	private static Session currentSession;
+	private static RenderInfo currentRenderInfo;
 
-	public static Session getCurrentSession() {
-		return currentSession;
+	public static RenderInfo getCurrentRenderInfo() {
+		return currentRenderInfo == null ? new RenderInfo() : currentRenderInfo;
 	}
 
-	public static void setCurrentSession(Session currentSession) {
-		EditorController.currentSession = currentSession;
+	public static void setCurrentRenderInfo(RenderInfo currentRenderInfo) {
+		EditorController.currentRenderInfo = currentRenderInfo;
 
 		RoutingDemo.getApplication().getMainFrame().repaint();
 	}
@@ -130,7 +131,7 @@ public class EditorController {
 	@Action
 	public void copyAction() {
 		MainFrame mainFrame = RoutingDemo.getMF();
-		GraphUtil.toClipBoard(mainFrame.getCurrentPage().net.getSelection());
+		GraphUtil.toClipBoard(mainFrame.getCurrentPage().graph.getSelection());
 	}
 
 	/**
@@ -140,7 +141,7 @@ public class EditorController {
 	public void cutAction() {
 		MainFrame mainFrame = RoutingDemo.getMF();
 		GraphUtil
-				.toClipBoard(mainFrame.getCurrentPage().net.getSelection(true));
+				.toClipBoard(mainFrame.getCurrentPage().graph.getSelection(true));
 		mainFrame.getCurrentEditor().repaint();
 	}
 
@@ -151,7 +152,7 @@ public class EditorController {
 	public void pasteAction() {
 		MainFrame mainFrame = RoutingDemo.getMF();
 		Graph net = GraphUtil.fromClipboard();
-		mainFrame.getCurrentPage().net.addAll(net);
+		mainFrame.getCurrentPage().graph.addAll(net);
 		Collection<Node> selected = new LinkedList<Node>();
 		selected.addAll(net.getNodeList());
 		mainFrame.getCurrentEditor().setSelection(selected);
@@ -164,9 +165,9 @@ public class EditorController {
 	@Action
 	public void duplicateAction() {
 		MainFrame mainFrame = RoutingDemo.getMF();
-		Graph net = mainFrame.getCurrentPage().net.getSelection(false);
+		Graph net = mainFrame.getCurrentPage().graph.getSelection(false);
 		net.translate(Canvas.TRANSITION_WIDTH, Canvas.TRANSITION_WIDTH);
-		mainFrame.getCurrentPage().net.addAll(net);
+		mainFrame.getCurrentPage().graph.addAll(net);
 		Collection<Node> selected = new LinkedList<Node>();
 		selected.addAll(net.getNodeList());
 		mainFrame.getCurrentEditor().setSelection(selected);
@@ -179,7 +180,7 @@ public class EditorController {
 	@Action
 	public void deleteAction() {
 		MainFrame mainFrame = RoutingDemo.getMF();
-		mainFrame.getCurrentPage().net.getSelection(true);
+		mainFrame.getCurrentPage().graph.getSelection(true);
 		mainFrame.getCurrentEditor().repaint();
 		mainFrame.sessionPanel.checkActionsState();
 	}
@@ -198,7 +199,9 @@ public class EditorController {
 		Session s = new Session();
 		s.name = "session " + s.id;
 		sessionEditor.setSession(s);
-		setCurrentSession(s);
+		RenderInfo ri = new RenderInfo();
+		ri.session = s;
+		setCurrentRenderInfo(ri);
 		sessionEditor.showDialog();
 	}
 }

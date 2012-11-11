@@ -20,7 +20,7 @@ public class SetDestinationNodesListener extends CanvasMouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Graph net = _editor.getDocument() != null
-				&& _editor.getDocument().net != null ? _editor.getDocument().net
+				&& _editor.getDocument().graph != null ? _editor.getDocument().graph
 				: null;
 
 		if (net != null) {

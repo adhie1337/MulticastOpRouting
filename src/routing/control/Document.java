@@ -34,7 +34,7 @@ public class Document {
 	/**
 	 * The graph instance.
 	 */
-	public Graph net;
+	public Graph graph;
 
 	/**
 	 * A collection of the sessions associated to the graph.
@@ -82,12 +82,12 @@ public class Document {
 	}
 
 	/**
-	 * File contetns getter.
+	 * File contents getter.
 	 * 
 	 * @return file contents
 	 */
 	public String getFileContents() {
-		_fileContents = GraphUtil.fromObject(net)
+		_fileContents = GraphUtil.fromObject(graph)
 				+ SessionUtil.fromObject(sessions);
 
 		return _fileContents;
@@ -109,17 +109,17 @@ public class Document {
 				Matcher m = p.matcher(_fileContents);
 
 				if (m.matches()) {
-					net = GraphUtil.fromString(m.group(1));
+					graph = GraphUtil.fromString(m.group(1));
 					sessions = SessionUtil.fromString(m.group(2));
 				} else {
-					net = GraphUtil.fromString(_fileContents);
+					graph = GraphUtil.fromString(_fileContents);
 					sessions = new Vector<Session>();
 				}
 			} catch (ApplicationException e) {
 				ErrorController.showError(e.getMessage(), e.getLevel());
 			}
 		} else {
-			net = new Graph();
+			graph = new Graph();
 			sessions = new Vector<Session>();
 		}
 	}
@@ -135,7 +135,7 @@ public class Document {
 		return CompareUtil.compare(getFileContents(), otherD.getFileContents())
 				&& CompareUtil.compare(filePath, otherD.filePath)
 				&& CompareUtil.compare(documentName, otherD.documentName)
-				&& CompareUtil.compare(net, otherD.net);
+				&& CompareUtil.compare(graph, otherD.graph);
 	}
 
 	@Override
@@ -150,7 +150,7 @@ public class Document {
 		hash = 37
 				* hash
 				+ (this.documentName != null ? this.documentName.hashCode() : 0);
-		hash = 37 * hash + (this.net != null ? this.net.hashCode() : 0);
+		hash = 37 * hash + (this.graph != null ? this.graph.hashCode() : 0);
 		return hash;
 	}
 

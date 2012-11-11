@@ -1,6 +1,13 @@
 package routing.view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -23,6 +30,8 @@ import routing.RoutingDemo;
 import routing.control.Document;
 import routing.control.EditorController;
 import routing.control.entities.Session;
+import routing.control.simulation.SimulationUtil;
+import routing.view.editor.RenderInfo;
 
 public class SessionPanel extends JPanel implements ListSelectionListener {
 
@@ -33,10 +42,12 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 	private JButton btnRemove;
 
 	public SessionPanel() {
-        ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
-        ActionMap editorMap = c.getActionMap(EditorController.getInstance());
-        ResourceMap resources = c.getResourceMap(SessionPanel.class);
-		setBorder(BorderFactory.createTitledBorder(resources.getString("SessionPanel.Title")));
+		ApplicationContext c = Application.getInstance(RoutingDemo.class)
+				.getContext();
+		ActionMap editorMap = c.getActionMap(EditorController.getInstance());
+		ResourceMap resources = c.getResourceMap(SessionPanel.class);
+		setBorder(BorderFactory.createTitledBorder(resources
+				.getString("SessionPanel.Title")));
 
 		JPanel unitGroup = new JPanel();
 		setLayout(new BorderLayout());
@@ -76,13 +87,15 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		EditorController.setCurrentSession(sessionList.getSelectedValue());
+		RenderInfo ri = new RenderInfo();
+		ri.session = sessionList.getSelectedValue();
+		EditorController.setCurrentRenderInfo(ri);
 		checkActionsState();
 	}
 
 	public void checkActionsState() {
 		if (document != null) {
-			btnAdd.setEnabled(document.net.getNodeList().size() >= 2);
+			btnAdd.setEnabled(document.graph.getNodeList().size() >= 2);
 			btnRemove.setEnabled(sessionList.getSelectedIndex() >= 0
 					&& sessionList.getSelectedIndex() < document.sessions
 							.size());
@@ -95,17 +108,17 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 	public Session getSelectedSession() {
 		return sessionList.getSelectedValue();
 	}
-	
+
 	public void selectSession(int id) {
-		for(int i = 0; i < document.sessions.size(); ++i) {
-			if(document.sessions.get(i).id == id) {
+		for (int i = 0; i < document.sessions.size(); ++i) {
+			if (document.sessions.get(i).id == id) {
 				sessionList.setSelectedIndex(i);
 				valueChanged(null);
 				break;
 			}
 		}
 	}
-	
+
 	@Override
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
@@ -113,15 +126,15 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 		btnAdd.setEnabled(enabled);
 		btnRemove.setEnabled(enabled);
 		sessionList.setEnabled(enabled);
-		
-		if(enabled) {
+
+		if (enabled) {
 			checkActionsState();
 		}
 	}
-	
+
 	@Action
-	public void removeSession(){
-		if(sessionList.getSelectedValue() != null) {
+	public void removeSession() {
+		if (sessionList.getSelectedValue() != null) {
 			document.sessions.remove(sessionList.getSelectedValue());
 			checkActionsState();
 			RoutingDemo.getMF().checkActionsState();

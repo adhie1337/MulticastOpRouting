@@ -43,7 +43,7 @@ public class CanvasMouseAddNodeListener extends CanvasMouseListener {
         if(handleDragAndDropStart(e))
             return;
 
-        Graph net = _editor.getDocument() != null && _editor.getDocument().net != null ? _editor.getDocument().net : null;
+        Graph net = _editor.getDocument() != null && _editor.getDocument().graph != null ? _editor.getDocument().graph : null;
 
         if(net != null && _editor.canvas.nodeToAdd == null)
         {
@@ -91,7 +91,7 @@ public class CanvasMouseAddNodeListener extends CanvasMouseListener {
         if(_editor.canvas.nodeToAdd == null && handleDragAndDropEnd(e))
             return;
 
-        Graph net = _editor.getDocument() != null && _editor.getDocument().net != null ? _editor.getDocument().net : null;
+        Graph net = _editor.getDocument() != null && _editor.getDocument().graph != null ? _editor.getDocument().graph : null;
 
         if(net != null && _editor.canvas.nodeToAdd != null)
         {

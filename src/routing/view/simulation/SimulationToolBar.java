@@ -94,11 +94,15 @@ public class SimulationToolBar extends JPanel implements ItemListener,
 
 	@Action
 	public void resetAction() {
-		chkAuto.setSelected(false);
+		unselectAutoStep();
 		SimulationController.getInstance().resetSimulationAction();
 	}
 
 	public void closingDialog() {
 		resetAction();
+	}
+	
+	public void unselectAutoStep() {
+		chkAuto.setSelected(false);
 	}
 }

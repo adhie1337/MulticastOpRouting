@@ -188,7 +188,7 @@ public class DocumentEditor extends JPanel {
 		_document = value;
 
 		if (canvas != null) {
-			canvas.setGraph(_document.net);
+			canvas.setGraph(_document.graph);
 		}
 	}
 
@@ -362,7 +362,7 @@ public class DocumentEditor extends JPanel {
 		setLayout(new BorderLayout(5, 2));
 
 		if (_document != null) {
-			canvas.setGraph(_document.net);
+			canvas.setGraph(_document.graph);
 		}
 
 		addComponentListener(new EditorListener());

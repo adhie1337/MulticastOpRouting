@@ -50,6 +50,8 @@ public class EdgePropertiesDialog extends JDialog {
 		super(owner);
 
 		initializeView();
+
+		getRootPane().setDefaultButton(okButton);
 	}
 
 	private void initializeView() {
@@ -98,8 +100,6 @@ public class EdgePropertiesDialog extends JDialog {
 								layout.createSequentialGroup()
 										.addComponent(okButton)
 										.addComponent(cancelButton))));
-
-		getRootPane().setDefaultButton(okButton);
 	}
 
 	@Action
@@ -123,6 +123,11 @@ public class EdgePropertiesDialog extends JDialog {
 		dispose();
 
 		RoutingDemo.getApplication().getMainFrame().repaint();
+	}
+	
+	public void showDialog() {
+		RoutingDemo.getApplication().show(this);
+		getRootPane().setDefaultButton(okButton);
 	}
 
 }

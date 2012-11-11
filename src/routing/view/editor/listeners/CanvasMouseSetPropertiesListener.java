@@ -39,7 +39,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		Graph net = _editor.getDocument() != null
-				&& _editor.getDocument().net != null ? _editor.getDocument().net
+				&& _editor.getDocument().graph != null ? _editor.getDocument().graph
 				: null;
 
 		if (net != null) {
@@ -75,7 +75,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 				}
 
 				nodeProperties.setNode((Node) selected);
-				RoutingDemo.getApplication().show(nodeProperties);
+				nodeProperties.showDialog();
 			} else if (selectedEdge != null) {
 				if (edgeProperties == null) {
 					edgeProperties = new EdgePropertiesDialog(RoutingDemo
@@ -83,7 +83,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 				}
 
 				edgeProperties.setEdge(selectedEdge);
-				RoutingDemo.getApplication().show(edgeProperties);
+				edgeProperties.showDialog();
 			}
 		}
 	}

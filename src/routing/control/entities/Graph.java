@@ -2,11 +2,15 @@ package routing.control.entities;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Vector;
 
 import com.sun.java.swing.plaf.windows.WindowsTreeUI.CollapsedIcon;
@@ -49,8 +53,26 @@ public class Graph {
 		return value;
 	}
 	
+	public Node getNode(int id) {
+		return nodes.get(id);
+	}
+	
+	public Set<Integer> getAdjacentNodeIds(int nodeId) {
+		if(weightMap.containsKey(nodeId)) {
+			return weightMap.get(nodeId).keySet();
+		}
+		
+		return new HashSet<Integer>();
+	}
+
 	public Collection<Node> getNodeList() {
 		return nodes.values();
+	}
+
+	public List<Integer> getNodeIds() {
+		List<Integer> retVal = new LinkedList<Integer>(nodes.keySet());
+		Collections.sort(retVal);
+		return retVal;
 	}
 	
 	public void removeNode(int id) {
@@ -72,6 +94,12 @@ public class Graph {
 			weightMap.remove(id);
 			nodes.remove(id);
 		}
+	}
+	
+	public HashMap<Integer, HashMap<Integer, Double>> copyWeightMap() {
+		Graph g = new Graph();
+		g.addAll(this);
+		return g.weightMap;
 	}
 
 	public void addAll(Graph net) {

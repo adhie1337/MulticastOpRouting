@@ -20,6 +20,7 @@ import org.jdesktop.application.FrameView;
 import routing.control.DocumentController;
 import routing.control.Document;
 import routing.control.EditorController;
+import routing.control.SimulationController;
 import routing.RoutingDemo;
 
 /**
@@ -227,6 +228,8 @@ public class MainFrame extends FrameView implements ChangeListener {
 				.getInstance());
 		ActionMap editorActionMap = c.getActionMap(EditorController
 				.getInstance());
+		ActionMap simuationActionMap = c.getActionMap(SimulationController
+				.getInstance());
 
 		if (tabbedPane.getTabCount() == 1) {
 			DocumentEditor editor = (DocumentEditor) tabbedPane
@@ -272,6 +275,9 @@ public class MainFrame extends FrameView implements ChangeListener {
 		editorActionMap.get("pasteAction").setEnabled(enableEditing);
 		editorActionMap.get("duplicateAction").setEnabled(enableEditing);
 		editorActionMap.get("deleteAction").setEnabled(enableEditing);
+		simuationActionMap.get("showSimulationDialogAction").setEnabled(
+				getCurrentPage().sessions.size() > 0
+						&& !SessionEditorDialog.isShown());
 
 		if (!enableEditing
 				&& getCurrentEditor().getEditorMode() == EditorMode.AddNode

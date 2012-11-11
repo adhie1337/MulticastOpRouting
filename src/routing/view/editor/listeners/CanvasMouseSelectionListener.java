@@ -35,7 +35,7 @@ public class CanvasMouseSelectionListener extends CanvasMouseListener {
 	public void mouseClicked(MouseEvent e) {
 
 		Graph net = _editor.getDocument() != null
-				&& _editor.getDocument().net != null ? _editor.getDocument().net
+				&& _editor.getDocument().graph != null ? _editor.getDocument().graph
 				: null;
 
 		if (net != null) {
@@ -107,7 +107,7 @@ public class CanvasMouseSelectionListener extends CanvasMouseListener {
 
 		List<Node> newSelection = new LinkedList<Node>();
 
-		Iterator<Node> nodeIt = _editor.getDocument().net.getNodeList()
+		Iterator<Node> nodeIt = _editor.getDocument().graph.getNodeList()
 				.iterator();
 
 		while (nodeIt.hasNext()) {

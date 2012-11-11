@@ -94,10 +94,10 @@ public class Document {
 	}
 
 	/**
-	 * File contetns setter.
+	 * File contents setter.
 	 * 
 	 * @param value
-	 *            new contetns of the file. Setting "" or null means erasing.
+	 *            new contents of the file. Setting "" or null means erasing.
 	 */
 	public void setFileContents(String value) {
 		_fileContents = value;

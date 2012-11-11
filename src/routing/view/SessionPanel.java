@@ -36,7 +36,7 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
         ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
         ActionMap editorMap = c.getActionMap(EditorController.getInstance());
         ResourceMap resources = c.getResourceMap(SessionPanel.class);
-		setBorder(BorderFactory.createTitledBorder("Sessions"));
+		setBorder(BorderFactory.createTitledBorder(resources.getString("SessionPanel.Title")));
 
 		JPanel unitGroup = new JPanel();
 		setLayout(new BorderLayout());

@@ -111,7 +111,7 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 		if (net != null && _editor.canvas.edgeToAddStart != null
 				&& _editor.canvas.edgeToAddFinish != null) {
 			net.setWeight(_editor.canvas.edgeToAddStart.id,
-					_editor.canvas.edgeToAddFinish.id, 1);
+					_editor.canvas.edgeToAddFinish.id, 0.5);
 		}
 
 		_editor.canvas.edgeToAddStart = null;

@@ -14,7 +14,7 @@ import org.jdesktop.application.ResourceMap;
 import routing.RoutingDemo;
 import routing.control.simulation.entities.AckPacket;
 import routing.control.simulation.entities.DataPacket;
-import routing.control.simulation.entities.NodeData;
+import routing.control.simulation.entities.NodeState;
 import routing.control.simulation.entities.Packet;
 
 public class DataPanel extends JPanel {
@@ -186,19 +186,26 @@ public class DataPanel extends JPanel {
 										.addComponent(packetTypeValue))));
 	}
 
-	public void setCurrentNodeData(NodeData nodeData) {
-		if (nodeData != null) {
-			NodeData.SessionData sessionData = nodeData.getSessionData();
-
-			nodeIdValue.setText(Integer.toString(nodeData.getNodeId()));
-			sessionIdValue.setText(Integer.toString(nodeData.getSessionId()));
-			batchNumberValue.setText(Integer.toString(sessionData
-					.getBatchNumber()));
-			creditsValue.setText(Integer.toString(sessionData.getCredits()));
-
-			forwardersValue.setText(idsToString(sessionData.getForwarderIds()));
-			reachableDestValue.setText(idsToString(sessionData
-					.getReachableDestIds()));
+	public void setCurrentNodeState(NodeState nodeState) {
+		if (nodeState != null) {
+			NodeState.SessionState sessionData = nodeState.getSessionState();
+			nodeIdValue.setText(Integer.toString(nodeState.getNodeId()));
+			sessionIdValue.setText(Integer.toString(nodeState.getSessionId()));
+			
+			if(sessionData != null) {
+				batchNumberValue.setText(Integer.toString(sessionData
+						.getBatchNumber()));
+				creditsValue.setText(Integer.toString(sessionData.getCredits()));
+	
+				forwardersValue.setText(idsToString(sessionData.getForwarderIds()));
+				reachableDestValue.setText(idsToString(sessionData
+						.getReachableDestIds()));
+			} else {
+				batchNumberValue.setText("-");
+				creditsValue.setText("-");
+				forwardersValue.setText("-");
+				reachableDestValue.setText("-");
+			}
 		} else {
 			nodeIdValue.setText(rm
 					.getString("DataPanel.NodePanel.NodeId.Value.NoData"));
@@ -240,6 +247,11 @@ public class DataPanel extends JPanel {
 			sb.append(", ");
 		}
 
-		return sb.toString().substring(0, -2);
+		String retVal = sb.toString();
+		if(retVal.length() > 0) {
+			return retVal.substring(0, retVal.length() - 2);
+		}
+		
+		return "-";
 	}
 }

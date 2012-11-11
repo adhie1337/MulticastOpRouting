@@ -18,6 +18,20 @@ import routing.view.editor.DocumentEditor.EditorMode;
 public class SimulationDialog extends JDialog implements ComponentListener {
 
 	private SimulationToolBar toolbar;
+	private DataPanel dataPanel;
+	private ProgressPanel progressPanel;
+
+	public SimulationToolBar getToolbar() {
+		return toolbar;
+	}
+
+	public DataPanel getDataPanel() {
+		return dataPanel;
+	}
+
+	public ProgressPanel getProgressPanel() {
+		return progressPanel;
+	}
 
 	public SimulationDialog() {
 		setModal(true);
@@ -38,8 +52,12 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 
 		toolbar = new SimulationToolBar();
 		add(toolbar, BorderLayout.NORTH);
-		add(new DataPanel(), BorderLayout.WEST);
-		add(new ProgressPanel(), BorderLayout.CENTER);
+
+		dataPanel = new DataPanel();
+		add(dataPanel, BorderLayout.WEST);
+
+		progressPanel = new ProgressPanel();
+		add(progressPanel, BorderLayout.CENTER);
 
 		addComponentListener(this);
 	}

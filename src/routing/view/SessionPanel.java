@@ -89,23 +89,6 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 	public void valueChanged(ListSelectionEvent e) {
 		RenderInfo ri = new RenderInfo();
 		ri.session = sessionList.getSelectedValue();
-		
-		HashMap<Integer, HashMap<Integer, Double>> mtx = SimulationUtil.createFloydMatrix(document.graph);
-
-		ri.directedEdges = new LinkedList<RenderInfo.Edge>();
-		List<Integer> ids = document.graph.getNodeIds();
-
-		for (int i = 0; i < ids.size(); ++i) {
-			int x = ids.get(i);
-			HashMap<Integer, Double> fromX;
-			fromX = mtx.get(x);
-			for (int j = 0; j < i; ++j) {
-				int y = ids.get(j);
-				Color c = new Color((int)(255/8*fromX.get(y)), 0, 0);
-				ri.directedEdges.add(new RenderInfo.Edge(x, y, c));
-				ri.directedEdges.add(new RenderInfo.Edge(y, x, c));
-			}
-		}
 		EditorController.setCurrentRenderInfo(ri);
 		checkActionsState();
 	}

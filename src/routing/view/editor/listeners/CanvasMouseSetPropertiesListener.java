@@ -12,8 +12,8 @@ import routing.view.editor.NodePropertiesDialog;
 import routing.RoutingDemo;
 
 /**
- * An event listener class that is responsible for the "propery editing" of the
- * entities and edges.
+ * An event listener class that is responsible for the "property editing" of the
+ * nodes and edges.
  * 
  * @author PIAPAAI.ELTE
  */
@@ -63,7 +63,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
 
-				if (isEntityAtPoint(actNode, e.getPoint())) {
+				if (isNodeAtPoint(actNode, e.getPoint())) {
 					selected = actNode;
 				}
 			}

@@ -32,10 +32,13 @@ public class Document {
 	public String documentName;
 
 	/**
-	 * The Petri net instance.
+	 * The graph instance.
 	 */
 	public Graph net;
-	
+
+	/**
+	 * A collection of the sessions associated to the graph.
+	 */
 	public Vector<Session> sessions;
 
 	/**
@@ -84,7 +87,8 @@ public class Document {
 	 * @return file contents
 	 */
 	public String getFileContents() {
-		_fileContents = GraphUtil.fromObject(net) + SessionUtil.fromObject(sessions);
+		_fileContents = GraphUtil.fromObject(net)
+				+ SessionUtil.fromObject(sessions);
 
 		return _fileContents;
 	}
@@ -100,10 +104,11 @@ public class Document {
 
 		if (value != null && !value.equals("")) {
 			try {
-				Pattern p = Pattern.compile("^(.*?\nh [^\n]+ n\n)(.*)$", Pattern.MULTILINE|Pattern.DOTALL);
+				Pattern p = Pattern.compile("^(.*?\nh [^\n]+ n\n)(.*)$",
+						Pattern.MULTILINE | Pattern.DOTALL);
 				Matcher m = p.matcher(_fileContents);
-				
-				if(m.matches()) {
+
+				if (m.matches()) {
 					net = GraphUtil.fromString(m.group(1));
 					sessions = SessionUtil.fromString(m.group(2));
 				} else {

@@ -18,13 +18,13 @@ import routing.RoutingDemo;
  * The class of the menu bar. Not that interesting.
  * @author PIAPAAI.ELTE
  */
-public class PetrinetMenuBar extends JMenuBar {
+public class MenuBar extends JMenuBar {
 
     /**
      * Constructor.
      * @param frame
      */
-    public PetrinetMenuBar(MainFrame frame) {
+    public MenuBar(MainFrame frame) {
         ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
         ActionMap actionMap = c.getActionMap(MainFrame.class, frame);
         ActionMap fileActionMap = c.getActionMap(DocumentController.getInstance());
@@ -129,28 +129,22 @@ public class PetrinetMenuBar extends JMenuBar {
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.CTRL_MASK));
         menu.add(menuItem);
 
-        menuItem = new JMenuItem(editorActionMap.get("setAddTransitionEditorStateAction"));
-        menuItem.setText(rm.getString("MainFrame.MenuItem.AddTransitionTool.Text"));
-        menuItem.setIcon(fileRm.getImageIcon("addTransitionAction.Action.icon_small"));
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.CTRL_MASK));
-        menu.add(menuItem);
-
         menuItem = new JMenuItem(editorActionMap.get("setAddEdgeEditorStateAction"));
         menuItem.setText(rm.getString("MainFrame.MenuItem.AddEdgeTool.Text"));
         menuItem.setIcon(fileRm.getImageIcon("addEdgeAction.Action.icon_small"));
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, ActionEvent.CTRL_MASK));
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, ActionEvent.CTRL_MASK));
         menu.add(menuItem);
 
         menuItem = new JMenuItem(editorActionMap.get("setSetPropertiesEditorStateAction"));
         menuItem.setText(rm.getString("MainFrame.MenuItem.SetPropertiesTool.Text"));
         menuItem.setIcon(fileRm.getImageIcon("setPropertiesAction.Action.icon_small"));
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.CTRL_MASK));
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, ActionEvent.CTRL_MASK));
         menu.add(menuItem);
 
         menuItem = new JMenuItem(editorActionMap.get("simulationEditorStateAction"));
         menuItem.setText(rm.getString("MainFrame.MenuItem.SimulationTool.Text"));
         menuItem.setIcon(fileRm.getImageIcon("simulateAction.Action.icon_small"));
-        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, ActionEvent.CTRL_MASK));
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.CTRL_MASK));
         menu.add(menuItem);
 
         menu = new JMenu(rm.getString("MainFrame.Menu.Help.Text"));

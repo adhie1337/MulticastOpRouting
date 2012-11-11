@@ -1,8 +1,5 @@
 package routing.view.editor;
 
-import routing.view.editor.listeners.CanvasMouseAddEdgeListener;
-import routing.view.editor.listeners.CanvasMouseAddNodeListener;
-import routing.view.editor.listeners.CanvasMouseSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
@@ -14,11 +11,18 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+
 import routing.control.Document;
 import routing.control.entities.Node;
+import routing.view.editor.listeners.CanvasMouseAddEdgeListener;
+import routing.view.editor.listeners.CanvasMouseAddNodeListener;
+import routing.view.editor.listeners.CanvasMouseSelectionListener;
 import routing.view.editor.listeners.CanvasMouseSetPropertiesListener;
+import routing.view.editor.listeners.SelectSourceNodeListener;
+import routing.view.editor.listeners.SetDestinationNodesListener;
 
 /**
  * 
@@ -33,32 +37,32 @@ public class DocumentEditor extends JPanel {
 	 * AddNode - add or move nodes.<br/>
 	 * AddTransition - add or move transitions<br/>
 	 * AddEdge - add or move edges<br/>
-	 * SetProperties - set the properties of the entity or edge, that is being
+	 * SetProperties - set the properties of the node or edge, that is being
 	 * clicked on.<br/>
 	 * Simulation - simulation mode
 	 */
 	public enum EditorMode {
 		/**
-		 * In selection mode, a click on an entity means sets the entity to the
-		 * only selection. Ctrl+click and Shift+click means add or remove the
-		 * entity from the selection. Alt+click means remove from selection.
-		 * When dragging the mouse on the background we can select multiple
-		 * entities in a rectangular area. Modifier keys also work in
-		 * rectangular selection mode.
+		 * In selection mode, a click on a node means sets the node to the only
+		 * selection. Ctrl+click and Shift+click means add or remove the node
+		 * from the selection. Alt+click means remove from selection. When
+		 * dragging the mouse on the background we can select multiple nodes in
+		 * a rectangular area. Modifier keys also work in rectangular selection
+		 * mode.
 		 */
 		Selection,
 		/**
-		 * In addnode mode, a click creates a new node in the Petri net.
-		 * Dragging existing nodes will move them and the selection. Selection
-		 * modifier keys will also work here.
+		 * In addnode mode, a click adds a new node in the graph. Dragging
+		 * existing nodes will move them and the selection. Selection modifier
+		 * keys will also work here.
 		 */
 		AddNode,
 		/**
-		 * Drag an edge from the source entity to the target entity to add it.
+		 * Drag an edge from the source node to the target node to add it.
 		 */
 		AddEdge,
 		/**
-		 * A new editor dialog pops up when clicking an entity or edge. the
+		 * A new editor dialog pops up when clicking an node or edge. the
 		 * clicked objects properties can be set in the editor dialog.
 		 */
 		SetProperties,
@@ -67,7 +71,7 @@ public class DocumentEditor extends JPanel {
 		 * Clicking it will execute the transition and add or remove the
 		 * resources from the source and destination nodes.
 		 */
-		Simulation
+		Simulation, SelectSourceNode, SelectDestinationNodes
 	};
 
 	private Document _document;
@@ -75,7 +79,7 @@ public class DocumentEditor extends JPanel {
 	public JScrollPane canvasContainer;
 	public Canvas canvas;
 
-	private Map<Integer, Node> _selectedEntities;
+	private Map<Integer, Node> _selectedNodes;
 
 	private MouseAdapter _currentMouseListener;
 	private EditorMode _editorMode;
@@ -104,6 +108,14 @@ public class DocumentEditor extends JPanel {
 				_currentMouseListener = new CanvasMouseSetPropertiesListener(
 						this);
 				break;
+			case SelectSourceNode:
+				_currentMouseListener = new SelectSourceNodeListener(this);
+				setSelection(new LinkedList<Node>());
+				break;
+			case SelectDestinationNodes:
+				_currentMouseListener = new SetDestinationNodesListener(this);
+				setSelection(new LinkedList<Node>());
+				break;
 			}
 		}
 
@@ -127,7 +139,7 @@ public class DocumentEditor extends JPanel {
 	 */
 	public DocumentEditor(Document document) {
 
-		_selectedEntities = new HashMap<Integer, Node>();
+		_selectedNodes = new HashMap<Integer, Node>();
 
 		_document = document;
 
@@ -176,7 +188,7 @@ public class DocumentEditor extends JPanel {
 		_document = value;
 
 		if (canvas != null) {
-			canvas.setNet(_document.net);
+			canvas.setGraph(_document.net);
 		}
 	}
 
@@ -195,14 +207,14 @@ public class DocumentEditor extends JPanel {
 	 * @param value
 	 */
 	public List<Node> getSelection() {
-		return new LinkedList<Node>(_selectedEntities.values());
+		return new LinkedList<Node>(_selectedNodes.values());
 	}
 
 	/**
 	 * Selection setter.
 	 * 
 	 * @param selection
-	 *            the entity that will be the only selected one.
+	 *            the node that will be the only selected one.
 	 */
 	public void setSelection(Node selection) {
 		Collection<Node> newSelection = new LinkedList<Node>();
@@ -211,13 +223,13 @@ public class DocumentEditor extends JPanel {
 	}
 
 	/**
-	 * Sets the selecttion to these entities. Others will be deselected.
+	 * Sets the selection to these nodes. Others will be deselected.
 	 * 
 	 * @param selection
-	 *            the entities to select.
+	 *            the nodes to select.
 	 */
 	public void setSelection(Collection<Node> selection) {
-		Iterator<Node> it = _selectedEntities.values().iterator();
+		Iterator<Node> it = _selectedNodes.values().iterator();
 
 		List<Node> removeAbles = new LinkedList<Node>();
 
@@ -235,7 +247,7 @@ public class DocumentEditor extends JPanel {
 
 		while (it.hasNext()) {
 			Node e = it.next();
-			_selectedEntities.remove(e.id);
+			_selectedNodes.remove(e.id);
 			e.selected = false;
 		}
 
@@ -243,7 +255,7 @@ public class DocumentEditor extends JPanel {
 
 		while (it.hasNext()) {
 			Node e = it.next();
-			_selectedEntities.put(e.id, e);
+			_selectedNodes.put(e.id, e);
 			e.selected = true;
 		}
 
@@ -251,17 +263,17 @@ public class DocumentEditor extends JPanel {
 	}
 
 	/**
-	 * Add the entity to the list of the selected ones.
+	 * Add the node to the list of the selected ones.
 	 * 
 	 * @param selection
 	 */
 	public void addToSelection(Node selection) {
-		_selectedEntities.put(selection.id, selection);
+		_selectedNodes.put(selection.id, selection);
 		selection.selected = true;
 	}
 
 	/**
-	 * Add the entities to the selected ones.
+	 * Add the nodes to the selected ones.
 	 * 
 	 * @param selection
 	 */
@@ -270,7 +282,7 @@ public class DocumentEditor extends JPanel {
 
 		while (it.hasNext()) {
 			Node e = it.next();
-			_selectedEntities.put(e.id, e);
+			_selectedNodes.put(e.id, e);
 			e.selected = true;
 		}
 
@@ -278,19 +290,19 @@ public class DocumentEditor extends JPanel {
 	}
 
 	/**
-	 * Deselect an entity.
+	 * Deselects an node.
 	 * 
 	 * @param selection
 	 */
 	public void removeFromSelection(Node selection) {
-		if (_selectedEntities.containsKey(selection.id)) {
-			_selectedEntities.remove(selection.id);
+		if (_selectedNodes.containsKey(selection.id)) {
+			_selectedNodes.remove(selection.id);
 			selection.selected = false;
 		}
 	}
 
 	/**
-	 * Deselect multiple entities.
+	 * Deselects multiple nodes.
 	 * 
 	 * @param selection
 	 */
@@ -299,7 +311,7 @@ public class DocumentEditor extends JPanel {
 
 		while (it.hasNext()) {
 			Node e = it.next();
-			_selectedEntities.remove(e.id);
+			_selectedNodes.remove(e.id);
 			e.selected = false;
 		}
 
@@ -307,20 +319,20 @@ public class DocumentEditor extends JPanel {
 	}
 
 	/**
-	 * Adds an entity to the selection if it isn't currently selected, otherwise
+	 * Adds a node to the selection if it isn't currently selected, otherwise
 	 * removes it's selection status.
 	 * 
 	 * @param selection
 	 */
 	public void addToOrRemoveFromSelection(Node selection) {
-		if (_selectedEntities.containsKey(selection.id))
+		if (_selectedNodes.containsKey(selection.id))
 			removeFromSelection(selection);
 		else
 			addToSelection(selection);
 	}
 
 	/**
-	 * Adds multiple entities to the selection if one isn't currently selected,
+	 * Adds multiple nodes to the selection if one isn't currently selected,
 	 * otherwise removes it's selection status.
 	 * 
 	 * @param selection
@@ -331,11 +343,11 @@ public class DocumentEditor extends JPanel {
 		while (it.hasNext()) {
 			Node e = it.next();
 
-			if (_selectedEntities.containsKey(e.id)) {
-				_selectedEntities.remove(e.id);
+			if (_selectedNodes.containsKey(e.id)) {
+				_selectedNodes.remove(e.id);
 				e.selected = false;
 			} else {
-				_selectedEntities.put(e.id, e);
+				_selectedNodes.put(e.id, e);
 				e.selected = true;
 			}
 		}
@@ -350,7 +362,7 @@ public class DocumentEditor extends JPanel {
 		setLayout(new BorderLayout(5, 2));
 
 		if (_document != null) {
-			canvas.setNet(_document.net);
+			canvas.setGraph(_document.net);
 		}
 
 		addComponentListener(new EditorListener());

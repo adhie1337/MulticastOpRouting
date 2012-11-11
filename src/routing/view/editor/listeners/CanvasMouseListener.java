@@ -15,8 +15,8 @@ import routing.view.editor.DocumentEditor;
 
 /**
  * The base mouse listener of the canvas. Sets up itself, provides functions
- * that determine whether an entity or edge is at a given point or not. Also
- * provides functions to determine the contents of a selection rect. Handles
+ * that determine whether a node or edge is at a given point or not. Also
+ * provides functions to determine the contents of a selection rectangle. Handles
  * drag and drop and zoom operations.
  * 
  * @author PIAPAAI.ELTE
@@ -74,16 +74,16 @@ public abstract class CanvasMouseListener extends MouseAdapter {
 						- getXAt(p2.y * z, p2.x * z, p1.y * z, p1.x * z, p.y)) <= 15);
 	}
 
-	protected Boolean isEntityAtPoint(Node e, java.awt.Point p) {
+	protected Boolean isNodeAtPoint(Node e, java.awt.Point p) {
 		double z = _editor.canvas.getZoom();
-		if (Math.pow(e.x * z - p.getX(), 2) + Math.pow(e.y * z - p.getY(), 2) <= 
-				Math.pow((Canvas.NODE_RADIUS + 1) * z, 2)) {
+		if (Math.pow(e.x * z - p.getX(), 2) + Math.pow(e.y * z - p.getY(), 2) <= Math
+				.pow((Canvas.NODE_RADIUS + 1) * z, 2)) {
 			return true;
 		}
 		return false;
 	}
 
-	protected Boolean isEntityInRect(Node e, java.awt.Point p, Dimension d) {
+	protected Boolean isNodeInRect(Node e, java.awt.Point p, Dimension d) {
 		double z = _editor.canvas.getZoom();
 		return e.x * z >= p.getX() && e.x * z <= p.getX() + d.width
 				&& e.y * z >= p.getY() && e.y * z <= p.getY() + d.height;
@@ -152,7 +152,7 @@ public abstract class CanvasMouseListener extends MouseAdapter {
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
 
-				if (isEntityAtPoint(actNode, e.getPoint()))
+				if (isNodeAtPoint(actNode, e.getPoint()))
 					selected = actNode;
 			}
 

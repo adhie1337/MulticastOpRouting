@@ -28,7 +28,7 @@ public class Edge {
 
     public Edge(Graph net) {
         this._net = net;
-        this.weight = 1.0;
+        this.weight = 0.5;
     }
 
     @Override

@@ -24,7 +24,7 @@ import routing.view.editor.Canvas;
 import routing.RoutingDemo;
 
 /**
- * A utility class for manipulating Petri nets, including conversion from and to
+ * A utility class for manipulating graphs, including conversion from and to
  * String, and managing clipboard operations.
  * 
  * @author PIAPAAI.ELTE
@@ -32,11 +32,11 @@ import routing.RoutingDemo;
 public class GraphUtil {
 
 	/**
-	 * Converts ndr file contents to Petri net objects.
+	 * Converts mor file contents to graph objects.
 	 * 
 	 * @param value
 	 *            the file contents as String
-	 * @return a Petri net object.
+	 * @return the graph object.
 	 * @throws ApplicationException
 	 *             the file format is incorrect or the file cannot be opened
 	 */
@@ -210,11 +210,11 @@ public class GraphUtil {
 	}
 
 	/**
-	 * A conversion function that convert a Petri net object to an ndr file
-	 * contetn string.
+	 * A conversion function that converts a graph object to a mor file
+	 * content string.
 	 * 
 	 * @param value
-	 *            the Petri net object
+	 *            the graph object
 	 * @return the net formatted as string
 	 */
 	public static String fromObject(Graph value) {
@@ -273,9 +273,9 @@ public class GraphUtil {
 	}
 
 	/**
-	 * Gets the copied Petri net from the clipboard.
+	 * Gets the copied graph from the clipboard.
 	 * 
-	 * @return the Petri net instance
+	 * @return the graph net instance
 	 */
 	public static Graph fromClipboard() {
 		Clipboard c = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -297,7 +297,7 @@ public class GraphUtil {
 	}
 
 	/**
-	 * Copies the given Petri net to the clipboard.
+	 * Copies the given graph to the clipboard.
 	 * 
 	 * @param net
 	 *            the net to copy.

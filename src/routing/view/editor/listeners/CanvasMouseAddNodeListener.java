@@ -100,7 +100,7 @@ public class CanvasMouseAddNodeListener extends CanvasMouseListener {
 
             net.addNode(_editor.canvas.nodeToAdd);
             
-            MainFrame mainFrame = (MainFrame)RoutingDemo.getApplication().getMainView();
+            MainFrame mainFrame = RoutingDemo.getMF();
             mainFrame.sessionPanel.checkActionsState();
 
             _editor.canvas.nodeToAdd = null;

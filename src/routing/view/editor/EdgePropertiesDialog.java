@@ -110,10 +110,15 @@ public class EdgePropertiesDialog extends JDialog {
 	@Action
 	public void commitChangesAction() {
 		try {
-			_edge.getNet().setWeight(_edge.from.id, _edge.to.id,
-					Double.parseDouble(weightField.getText()));
+			double weight = Double.parseDouble(weightField.getText());
+			if(weight >= 0.01 && weight <= 1.0) {
+				_edge.getNet().setWeight(_edge.from.id, _edge.to.id, weight);
+			} else {
+				throw new Exception();
+			}
 		} catch (Exception e) {
 			ErrorController.showError("Invalid weight format!", "Error");
+			return;
 		}
 		dispose();
 

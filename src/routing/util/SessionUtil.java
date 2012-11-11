@@ -78,8 +78,9 @@ public class SessionUtil {
 		
 		retVal.id = Integer.parseInt(line.get(1));
 		retVal.weight = Integer.parseInt(line.get(2));
-		retVal.sourceId = Integer.parseInt(line.get(3));
-		int i = 4;
+		retVal.batchCount = Integer.parseInt(line.get(3));
+		retVal.sourceId = Integer.parseInt(line.get(4));
+		int i = 5;
 		
 		while(!line.get(i).equals("n")) {
 			retVal.destinationIds.add(Integer.parseInt(line.get(i++)));
@@ -110,7 +111,7 @@ public class SessionUtil {
 					}
 				} while (i != line.size());
 
-				retVal.name = label;
+				retVal.name = label.trim();
 			}
 		} else {
 			// Error?
@@ -127,6 +128,8 @@ public class SessionUtil {
 			sb.append(s.id);
 			sb.append(" ");
 			sb.append(s.weight);
+			sb.append(" ");
+			sb.append(s.batchCount);
 			sb.append(" ");
 			sb.append(s.sourceId);
 			sb.append(" ");

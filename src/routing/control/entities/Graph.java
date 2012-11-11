@@ -2,8 +2,10 @@ package routing.control.entities;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,9 +54,15 @@ public class Graph {
 	public Node getNode(int id) {
 		return nodes.get(id);
 	}
-	
+
 	public Collection<Node> getNodeList() {
 		return nodes.values();
+	}
+
+	public List<Integer> getNodeIds() {
+		List<Integer> retVal = new LinkedList<Integer>(nodes.keySet());
+		Collections.sort(retVal);
+		return retVal;
 	}
 	
 	public void removeNode(int id) {
@@ -76,6 +84,12 @@ public class Graph {
 			weightMap.remove(id);
 			nodes.remove(id);
 		}
+	}
+	
+	public HashMap<Integer, HashMap<Integer, Double>> copyWeightMap() {
+		Graph g = new Graph();
+		g.addAll(this);
+		return g.weightMap;
 	}
 
 	public void addAll(Graph net) {

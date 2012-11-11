@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -27,6 +30,7 @@ import routing.RoutingDemo;
 import routing.control.Document;
 import routing.control.EditorController;
 import routing.control.entities.Session;
+import routing.control.simulation.SimulationUtil;
 import routing.view.editor.RenderInfo;
 
 public class SessionPanel extends JPanel implements ListSelectionListener {
@@ -85,13 +89,30 @@ public class SessionPanel extends JPanel implements ListSelectionListener {
 	public void valueChanged(ListSelectionEvent e) {
 		RenderInfo ri = new RenderInfo();
 		ri.session = sessionList.getSelectedValue();
+		
+		HashMap<Integer, HashMap<Integer, Double>> mtx = SimulationUtil.createFloydMatrix(document.graph);
+
+		ri.directedEdges = new LinkedList<RenderInfo.Edge>();
+		List<Integer> ids = document.graph.getNodeIds();
+
+		for (int i = 0; i < ids.size(); ++i) {
+			int x = ids.get(i);
+			HashMap<Integer, Double> fromX;
+			fromX = mtx.get(x);
+			for (int j = 0; j < i; ++j) {
+				int y = ids.get(j);
+				Color c = new Color((int)(255/8*fromX.get(y)), 0, 0);
+				ri.directedEdges.add(new RenderInfo.Edge(x, y, c));
+				ri.directedEdges.add(new RenderInfo.Edge(y, x, c));
+			}
+		}
 		EditorController.setCurrentRenderInfo(ri);
 		checkActionsState();
 	}
 
 	public void checkActionsState() {
 		if (document != null) {
-			btnAdd.setEnabled(document.net.getNodeList().size() >= 2);
+			btnAdd.setEnabled(document.graph.getNodeList().size() >= 2);
 			btnRemove.setEnabled(sessionList.getSelectedIndex() >= 0
 					&& sessionList.getSelectedIndex() < document.sessions
 							.size());

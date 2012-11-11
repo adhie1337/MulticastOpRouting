@@ -39,7 +39,7 @@ public class NodeData {
 		private int credits;
 
 		public List<Packet> packets;
-		
+
 		private Set<Integer> forwarderIds;
 		private Set<Integer> reachableDestIds;
 
@@ -64,42 +64,47 @@ public class NodeData {
 		public Iterable<Integer> getReachableDestIds() {
 			return reachableDestIds;
 		}
-
-		public void addForwarderId(int id) {
-			forwarderIds.add(id);
-		}
-
-		public void addReachableDestId(int id) {
-			reachableDestIds.add(id);
-		}
 	}
-	
+
 	// state changes by a data packet
 	public void transformWithDataPacket(DataPacket packet) {
 		transformWithPacket(packet);
-		
-		
+
 	}
-	
+
 	// state changes by an acknowledgment packet
 	public void transformWithAckPacket(AckPacket packet) {
 		transformWithPacket(packet);
-		
-		
+
 	}
-	
+
 	// common state changes by each packet
 	private void transformWithPacket(Packet packet) {
 		SessionData psd;
-		
-		if(!sessionData.containsKey(packet.sessionId)) {
+
+		if (!sessionData.containsKey(packet.sessionId)) {
 			psd = new SessionData();
 			sessionData.put(packet.sessionId, psd);
 		} else {
 			psd = sessionData.get(packet.sessionId);
 		}
-		
+
 		psd.batchNumber = packet.getBatchNumber();
 		psd.packets.add(packet);
+	}
+
+	// common state changes by each packet
+	private void transformWithPacket(InfoPacket packet) {
+		SessionData psd;
+
+		if (!sessionData.containsKey(packet.sessionId)) {
+			psd = new SessionData();
+			sessionData.put(packet.sessionId, psd);
+		} else {
+			psd = sessionData.get(packet.sessionId);
+		}
+
+		psd.forwarderIds = packet.forwarderIds;
+		psd.reachableDestIds = packet.reachableDestIds;
 	}
 }

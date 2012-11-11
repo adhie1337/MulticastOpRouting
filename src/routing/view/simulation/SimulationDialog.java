@@ -39,7 +39,7 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 		toolbar = new SimulationToolBar();
 		add(toolbar, BorderLayout.NORTH);
 		add(new DataPanel(), BorderLayout.WEST);
-		add(new ProgressPanel(), BorderLayout.EAST);
+		add(new ProgressPanel(), BorderLayout.CENTER);
 
 		addComponentListener(this);
 	}
@@ -70,12 +70,15 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 	}
 
 	@Override
-	public void componentMoved(ComponentEvent e) { }
+	public void componentMoved(ComponentEvent e) {
+	}
 
 	@Override
-	public void componentResized(ComponentEvent e) { }
+	public void componentResized(ComponentEvent e) {
+	}
 
 	@Override
-	public void componentShown(ComponentEvent e) { }
+	public void componentShown(ComponentEvent e) {
+	}
 
 }

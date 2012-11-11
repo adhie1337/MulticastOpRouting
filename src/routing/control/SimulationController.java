@@ -2,6 +2,7 @@ package routing.control;
 
 import org.jdesktop.application.Action;
 
+import routing.control.simulation.Simulation;
 import routing.view.simulation.SimulationDialog;
 
 public class SimulationController {
@@ -32,6 +33,16 @@ public class SimulationController {
 		}
 	}
 	
+	private Simulation currentSimulation;
+	
+	public Simulation getCurrentSimulation() {
+		return currentSimulation;
+	}
+
+	public void setCurrentSimulation(Simulation currentSimulation) {
+		this.currentSimulation = currentSimulation;
+	}
+
 	private SimulationDialog simulationDialog;
 	
 	@Action
@@ -40,6 +51,22 @@ public class SimulationController {
 			simulationDialog = new SimulationDialog();
 		
 		simulationDialog.showDialog();
+	}
+
+	@Action
+	public void stepSimulationAction() {
+		System.out.print("step ");
+		
+		if(currentSimulation != null) {
+			currentSimulation.step();
+			System.out.print(currentSimulation.getStep());
+		}
+		System.out.println();
+	}
+
+	@Action
+	public void resetSimulationAction() {
+		System.out.println("reset");
 	}
 	
 }

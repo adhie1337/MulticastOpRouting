@@ -38,7 +38,7 @@ public class Toolbar extends JToolBar{
     public JToggleButton btnAddTransition;
     public JToggleButton btnAddEdge;
     public JToggleButton btnSetProperties;
-    public JToggleButton btnSimulate;
+    public JButton btnSimulate;
 
     private ButtonGroup btngGroup;
 
@@ -121,7 +121,7 @@ public class Toolbar extends JToolBar{
         btnSetProperties.setIcon(fileRm.getImageIcon("setPropertiesAction.Action.icon"));
         add(btnSetProperties);
 
-        btnSimulate = new JToggleButton();
+        btnSimulate = new JButton();
         btnSimulate.setAction(simulationActionMap.get("showSimulationDialogAction"));
         btnSimulate.setText("");
         btngGroup.add(btnSimulate);

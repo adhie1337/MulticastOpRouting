@@ -50,8 +50,8 @@ public class MainFrame extends FrameView implements ChangeListener {
 	}
 
 	/**
-	 * opens a new editor page and sets it up for the given Petri net. Also
-	 * shows the editor in the view.
+	 * Opens a new editor page and sets it up for the given graph. Also shows
+	 * the editor in the view.
 	 * 
 	 * @param document
 	 *            the document that is being set to the new editor instance
@@ -170,8 +170,8 @@ public class MainFrame extends FrameView implements ChangeListener {
 	}
 
 	/**
-	 * Updates the current editor tab label to the name of the Petri net
-	 * document instance.
+	 * Updates the current editor tab label to the name of the document
+	 * instance.
 	 */
 	public void updateCurrentLabel() {
 		Document document = ((DocumentEditor) tabbedPane.getSelectedComponent())
@@ -202,7 +202,7 @@ public class MainFrame extends FrameView implements ChangeListener {
 	}
 
 	private void initFrame() {
-		setMenuBar(new PetrinetMenuBar(this));
+		setMenuBar(new MenuBar(this));
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP,
 				JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -238,19 +238,25 @@ public class MainFrame extends FrameView implements ChangeListener {
 				fileActionMap.get("closeFileAction").setEnabled(false);
 				fileActionMap.get("reloadFileAction").setEnabled(false);
 			} else {
-				fileActionMap.get("closeFileAction").setEnabled(!SessionEditorDialog.isShown());
-				fileActionMap.get("reloadFileAction").setEnabled(!SessionEditorDialog.isShown());
+				fileActionMap.get("closeFileAction").setEnabled(
+						!SessionEditorDialog.isShown());
+				fileActionMap.get("reloadFileAction").setEnabled(
+						!SessionEditorDialog.isShown());
 			}
 		} else if (tabbedPane.getTabCount() == 0) {
 			fileActionMap.get("closeFileAction").setEnabled(false);
 			fileActionMap.get("reloadFileAction").setEnabled(false);
 		} else {
-			fileActionMap.get("closeFileAction").setEnabled(!SessionEditorDialog.isShown());
-			fileActionMap.get("reloadFileAction").setEnabled(!SessionEditorDialog.isShown());
+			fileActionMap.get("closeFileAction").setEnabled(
+					!SessionEditorDialog.isShown());
+			fileActionMap.get("reloadFileAction").setEnabled(
+					!SessionEditorDialog.isShown());
 		}
 
-		fileActionMap.get("loadFileAction").setEnabled(!SessionEditorDialog.isShown());
-		fileActionMap.get("newFileAction").setEnabled(!SessionEditorDialog.isShown());
+		fileActionMap.get("loadFileAction").setEnabled(
+				!SessionEditorDialog.isShown());
+		fileActionMap.get("newFileAction").setEnabled(
+				!SessionEditorDialog.isShown());
 
 		boolean enableEditing = getCurrentPage().sessions.size() == 0
 				&& !SessionEditorDialog.isShown();
@@ -272,7 +278,7 @@ public class MainFrame extends FrameView implements ChangeListener {
 				&& getCurrentEditor().getEditorMode() == EditorMode.AddEdge) {
 			getCurrentEditor().setEditorMode(EditorMode.Selection);
 		}
-		
+
 		tabbedPane.setEnabled(!SessionEditorDialog.isShown());
 		sessionPanel.setEnabled(!SessionEditorDialog.isShown());
 	}

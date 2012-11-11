@@ -30,7 +30,7 @@ public class SelectSourceNodeListener extends CanvasMouseListener {
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
 
-				if (isEntityAtPoint(actNode, e.getPoint())) {
+				if (isNodeAtPoint(actNode, e.getPoint())) {
 					selected = actNode;
 				}
 			}

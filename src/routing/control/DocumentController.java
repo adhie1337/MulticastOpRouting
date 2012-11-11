@@ -40,8 +40,7 @@ public class DocumentController {
 	}
 
 	/**
-	 * Writes a document to the specified file path, using the Petrinet
-	 * serializer.
+	 * Writes a document to the specified file path, using the serializer.
 	 * 
 	 * @param document
 	 *            the document to write to the file

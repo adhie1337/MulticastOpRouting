@@ -18,13 +18,13 @@ import routing.RoutingDemo;
  * The class of the menu bar. Not that interesting.
  * @author PIAPAAI.ELTE
  */
-public class PetrinetMenuBar extends JMenuBar {
+public class MenuBar extends JMenuBar {
 
     /**
      * Constructor.
      * @param frame
      */
-    public PetrinetMenuBar(MainFrame frame) {
+    public MenuBar(MainFrame frame) {
         ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
         ActionMap actionMap = c.getActionMap(MainFrame.class, frame);
         ActionMap fileActionMap = c.getActionMap(DocumentController.getInstance());

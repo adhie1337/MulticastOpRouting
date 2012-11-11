@@ -48,7 +48,7 @@ public class CanvasMouseSelectionListener extends CanvasMouseListener {
 
 				if (selected != null) {
 					break;
-				} else if (isEntityAtPoint(actNode, e.getPoint())) {
+				} else if (isNodeAtPoint(actNode, e.getPoint())) {
 					selected = actNode;
 				}
 			}
@@ -113,7 +113,7 @@ public class CanvasMouseSelectionListener extends CanvasMouseListener {
 		while (nodeIt.hasNext()) {
 			Node actNode = nodeIt.next();
 
-			if (isEntityInRect(actNode, a, b)) {
+			if (isNodeInRect(actNode, a, b)) {
 				newSelection.add(actNode);
 			}
 		}

@@ -46,7 +46,7 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 
 				if (found != null) {
 					break;
-				} else if (isEntityAtPoint(actNode, e.getPoint())) {
+				} else if (isNodeAtPoint(actNode, e.getPoint())) {
 					found = actNode;
 				}
 			}
@@ -79,10 +79,9 @@ public class CanvasMouseAddEdgeListener extends CanvasMouseListener {
 			while (nodeIt.hasNext()) {
 				Node actNode = nodeIt.next();
 
-				if (found != null) {
-					break;
-				} else if (isEntityAtPoint(actNode, e.getPoint())) {
+				if (!_editor.canvas.edgeToAddStart.equals(actNode) && isNodeAtPoint(actNode, e.getPoint())) {
 					found = actNode;
+					break;
 				}
 			}
 

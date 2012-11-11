@@ -56,6 +56,9 @@ public class SessionEditorDialog extends JDialog {
 	private JLabel weightLabel;
 	private JTextField weightField;
 
+	private JLabel batchCountLabel;
+	private JTextField batchCountField;
+
 	private JLabel statusLabel;
 
 	private Session _session;
@@ -88,6 +91,7 @@ public class SessionEditorDialog extends JDialog {
 			idField.setText(Integer.toString(_session.id));
 			nameField.setText(_session.name);
 			weightField.setText(Integer.toString(_session.weight));
+			batchCountField.setText(Integer.toString(_session.batchCount));
 		}
 	}
 
@@ -116,6 +120,8 @@ public class SessionEditorDialog extends JDialog {
 				rm.getString("SessionEditorDialog.JLabel.name.Text"));
 		weightLabel = new JLabel(
 				rm.getString("SessionEditorDialog.JLabel.weight.Text"));
+		batchCountLabel = new JLabel(
+				rm.getString("SessionEditorDialog.JLabel.batchCount.Text"));
 		statusLabel = new JLabel(
 				rm.getString("SessionEditorDialog.JLabel.status.Text_source"));
 		
@@ -128,6 +134,9 @@ public class SessionEditorDialog extends JDialog {
 
 		weightField = new JTextField();
 		weightField.setSize(10, idField.getSize().height);
+
+		batchCountField = new JTextField();
+		batchCountField.setSize(10, idField.getSize().height);
 
 		okButton = new JButton(actionMap.get("commitChangesAction"));
 		okButton.setText(rm.getString("SessionEditorDialog.JButton.ok.Text"));
@@ -157,6 +166,11 @@ public class SessionEditorDialog extends JDialog {
 										GroupLayout.Alignment.CENTER)
 										.addComponent(weightLabel)
 										.addComponent(weightField))
+						.addGroup(
+								layout.createParallelGroup(
+										GroupLayout.Alignment.CENTER)
+										.addComponent(batchCountLabel)
+										.addComponent(batchCountField))
 						.addComponent(statusLabel)
 						.addGroup(
 								layout.createParallelGroup(
@@ -177,6 +191,10 @@ public class SessionEditorDialog extends JDialog {
 								layout.createSequentialGroup()
 										.addComponent(weightLabel)
 										.addComponent(weightField, 150, 150, 150))
+						.addGroup(
+								layout.createSequentialGroup()
+										.addComponent(batchCountLabel)
+										.addComponent(batchCountField, 150, 150, 150))
 						.addComponent(statusLabel, GroupLayout.Alignment.LEADING)
 						.addGroup(
 								layout.createSequentialGroup()
@@ -220,12 +238,16 @@ public class SessionEditorDialog extends JDialog {
 			}
 		} else if(currentState == EditorState.SelectDestinationNodes) {
 			if(_session.destinationIds.size() > 0) {
-					_session.name = nameField.getText();
-		
+				_session.name = nameField.getText();
+
+				String actField = "weight";
+				
 				try {
 					_session.weight = Integer.parseInt(weightField.getText());
+					actField = "batch count";
+					_session.batchCount = Integer.parseInt(batchCountField.getText());
 				} catch (Exception e) {
-					ErrorController.showError("Invalid weight format!", "Error");
+					ErrorController.showError("Invalid " + actField + " format!", "Error");
 					return;
 				}
 		

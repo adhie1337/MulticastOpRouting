@@ -20,23 +20,22 @@ import javax.swing.JPanel;
 import routing.control.entities.Node;
 
 /**
- * The canvas class. Handles the drawing of the Petri net being currently
- * edited.
+ * The canvas class. Handles the drawing of the graph being currently edited.
  * 
  * @author PIAPAAI.ELTE
  */
 public class Canvas extends JPanel {
 
 	private DocumentEditor _editor;
-	private Graph _net;
+	private Graph _graph;
 
 	/**
-	 * Petri net setter.
+	 * Graph setter.
 	 * 
 	 * @param value
 	 */
-	public void setNet(Graph value) {
-		_net = value;
+	public void setGraph(Graph value) {
+		_graph = value;
 
 		calculateMinSize();
 
@@ -44,10 +43,10 @@ public class Canvas extends JPanel {
 	}
 
 	/**
-	 * Petri net getter.
+	 * Graph getter.
 	 */
-	public Graph getNet() {
-		return _net;
+	public Graph getGraph() {
+		return _graph;
 	}
 
 	private Double _zoom = 1.0;
@@ -84,7 +83,7 @@ public class Canvas extends JPanel {
 	 * Constructor.
 	 * 
 	 * @param editor
-	 *            the editor to draw the Petri net by.
+	 *            the editor to draw the graph by.
 	 */
 	public Canvas(DocumentEditor editor) {
 		_editor = editor;
@@ -100,7 +99,7 @@ public class Canvas extends JPanel {
 	public void paint(Graphics g) {
 		g.clearRect(0, 0, getWidth(), getHeight());
 
-		if (_net == null) {
+		if (_graph == null) {
 			return;
 		}
 
@@ -109,13 +108,13 @@ public class Canvas extends JPanel {
 		((Graphics2D) g).setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_BEVEL));
 
-		Iterator<Node> nodeIt = _net.getNodeList().iterator();
+		Iterator<Node> nodeIt = _graph.getNodeList().iterator();
 
 		while (nodeIt.hasNext()) {
 			drawNode(nodeIt.next(), g.create());
 		}
 
-		Iterator<Edge> edgeIt = _net.getEdgeList().iterator();
+		Iterator<Edge> edgeIt = _graph.getEdgeList().iterator();
 
 		((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_BEVEL));
@@ -156,7 +155,7 @@ public class Canvas extends JPanel {
 				c = new Color((float) 0.0, (float) 0.0, (float) 1.0,
 						(float) 1.0);
 
-				Edge edgeToDraw = new Edge(_net);
+				Edge edgeToDraw = new Edge(_graph);
 				edgeToDraw.from = edgeToAddStart;
 				edgeToDraw.to = edgeToAddFinish;
 
@@ -317,14 +316,13 @@ public class Canvas extends JPanel {
 	}
 
 	/**
-	 * Recalculates the minimum size required by the nodes and transitions of
-	 * the Petri net and the zoom value. Also sets the minimum size so the
-	 * scroll bars can be set.
+	 * Recalculates the minimum size required by the nodes of the graph and the
+	 * zoom value. Also sets the minimum size so the scroll bars can be set.
 	 */
 	public void calculateMinSize() {
 		Dimension minSize = new Dimension();
 
-		Iterator<Node> nodeIt = _net.getNodeList().iterator();
+		Iterator<Node> nodeIt = _graph.getNodeList().iterator();
 
 		double translateX = 0.0;
 		double translateY = 0.0;
@@ -352,7 +350,7 @@ public class Canvas extends JPanel {
 			translateY = -translateY;
 		}
 
-		_net.translate(translateX, translateY);
+		_graph.translate(translateX, translateY);
 
 		minSize.width += translateX;
 		minSize.height += translateY;
@@ -384,7 +382,7 @@ public class Canvas extends JPanel {
 	 */
 	public Color getColorForEntity(Object value, Boolean lineColor) {
 		Session s = EditorController.getCurrentSession();
-		
+
 		if (value instanceof Edge) {
 			if (_editor.getEditorMode() == DocumentEditor.EditorMode.Simulation) {
 				return Color.BLACK;
@@ -393,9 +391,12 @@ public class Canvas extends JPanel {
 		} else if (value instanceof Node) {
 			if (_editor.getEditorMode() == DocumentEditor.EditorMode.Simulation) {
 				return Color.BLACK;
-			} else if(s != null && s.sourceId == ((Node)value).id && !lineColor) {
+			} else if (s != null && s.sourceId == ((Node) value).id
+					&& !lineColor) {
 				return new Color(187, 215, 242);
-			} else if(s != null && s.destinationIds.contains(((Node)value).id) && !lineColor) {
+			} else if (s != null
+					&& s.destinationIds.contains(((Node) value).id)
+					&& !lineColor) {
 				return new Color(253, 176, 176);
 			} else {
 				if (!lineColor)

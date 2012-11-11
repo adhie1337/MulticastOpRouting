@@ -1,8 +1,14 @@
 package routing.view;
 
+import java.awt.TextField;
+
 import javax.swing.ActionMap;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import org.jdesktop.application.Application;
@@ -10,6 +16,7 @@ import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.ResourceMap;
 import routing.control.DocumentController;
 import routing.control.EditorController;
+import routing.control.SimulationController;
 import routing.RoutingDemo;
 
 /**
@@ -47,6 +54,7 @@ public class Toolbar extends JToolBar{
         ApplicationContext c = Application.getInstance(RoutingDemo.class).getContext();
         ActionMap appActionMap = c.getActionMap(RoutingDemo.getApplication());
         ActionMap editorActionMap = c.getActionMap(EditorController.getInstance());
+        ActionMap simulationActionMap = c.getActionMap(SimulationController.getInstance());
         ResourceMap fileRm = c.getResourceMap(DocumentController.class);
         ActionMap fileActionMap = c.getActionMap(DocumentController.getInstance());
 
@@ -114,7 +122,7 @@ public class Toolbar extends JToolBar{
         add(btnSetProperties);
 
         btnSimulate = new JToggleButton();
-        //btnSimulate.setAction(editorActionMap.get("simulationEditorStateAction"));
+        btnSimulate.setAction(simulationActionMap.get("showSimulationDialogAction"));
         btnSimulate.setText("");
         btngGroup.add(btnSimulate);
         btnSimulate.setIcon(fileRm.getImageIcon("simulateAction.Action.icon"));

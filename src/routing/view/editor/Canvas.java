@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.text.NumberFormat;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import routing.control.EditorController;
@@ -70,6 +71,7 @@ public class Canvas extends JPanel {
 	}
 
 	public static final Integer NODE_RADIUS = 20;
+	public static final Integer HIGHLIGHTED_RADIUS = 25;
 	public static final Integer TRANSITION_WIDTH = 32;
 	private final int ARR_SIZE = 8;
 
@@ -168,54 +170,75 @@ public class Canvas extends JPanel {
 						NODE_RADIUS - 1);
 
 				g.setColor(c);
+				g.drawLine(start.x, start.y, edgeToAddEnd.x, edgeToAddEnd.y);
+			}
+		}
 
-				if (false) {
-					drawArrow((Graphics2D) g, start.x, start.y, edgeToAddEnd.x,
-							edgeToAddEnd.y);
-				} else {
-					g.drawLine(start.x, start.y, edgeToAddEnd.x, edgeToAddEnd.y);
+		List<RenderInfo.Edge> de = EditorController.getCurrentRenderInfo().directedEdges;
+
+		if (de != null) {
+			for (RenderInfo.Edge re : de) {
+				Node from = _graph.getNode(re.fromId);
+				Node to = _graph.getNode(re.toId);
+
+				if (from != null && to != null) {
+					Edge e = new Edge(_graph);
+					e.weight = 0d;
+					e.from = from;
+					e.to = to;
+					drawEdge(e, g, re.color, true);
 				}
 			}
 		}
 	}
 
-	private void drawNode(Node p, Graphics g) {
-		java.awt.Point pos = getCorrectedPosition(p);
-		g.setColor(getColorForEntity(p, false));
+	private void drawNode(Node n, Graphics g) {
+		java.awt.Point pos = getCorrectedPosition(n);
+		g.setColor(getColorForEntity(n, false));
 		g.fillOval((int) ((pos.x - NODE_RADIUS) * _zoom),
 				(int) ((pos.y - NODE_RADIUS) * _zoom),
 				(int) (2 * NODE_RADIUS * _zoom),
 				(int) (2 * NODE_RADIUS * _zoom));
-		g.setColor(getColorForEntity(p, true));
+		g.setColor(getColorForEntity(n, true));
 		g.drawOval((int) ((pos.x - NODE_RADIUS) * _zoom),
 				(int) ((pos.y - NODE_RADIUS) * _zoom),
 				(int) (2 * NODE_RADIUS * _zoom),
 				(int) (2 * NODE_RADIUS * _zoom));
 
-		if (p.label != null && !p.label.trim().equals("")) {
+		RenderInfo ri = EditorController.getCurrentRenderInfo();
+
+		if (ri.highlightedNodeIds != null
+				&& ri.highlightedNodeIds.contains(n.id)) {
+			g.drawOval((int) ((pos.x - HIGHLIGHTED_RADIUS) * _zoom),
+					(int) ((pos.y - HIGHLIGHTED_RADIUS) * _zoom),
+					(int) (2 * HIGHLIGHTED_RADIUS * _zoom),
+					(int) (2 * HIGHLIGHTED_RADIUS * _zoom));
+		}
+
+		if (n.label != null && !n.label.trim().equals("")) {
 			Graphics g2 = g.create();
 			g2.setFont(g2.getFont().deriveFont(
 					(float) (NODE_RADIUS * 2 / 3 * _zoom)));
 
 			FontMetrics m = g2.getFontMetrics();
 
-			g2.drawString(p.label, (int) (pos.x * _zoom - m
-					.stringWidth(p.label) / 2), (int) ((pos.y - NODE_RADIUS)
+			g2.drawString(n.label, (int) (pos.x * _zoom - m
+					.stringWidth(n.label) / 2), (int) ((pos.y - NODE_RADIUS)
 					* _zoom - g2.getFont().getSize2D() / 2));
 		}
 
-		/*
-		 * if(p.weight > 0) { String lbl =
-		 * NumberFormat.getNumberInstance(Locale.US).format(p.weight); Graphics
-		 * g2 = g.create();
-		 * g2.setFont(g2.getFont().deriveFont((float)(NODE_RADIUS * 2 / 3 *
-		 * _zoom)));
-		 * 
-		 * FontMetrics m = g2.getFontMetrics();
-		 * 
-		 * g2.drawString(lbl, (int)(pos.x * _zoom - m.stringWidth(lbl) / 2),
-		 * (int)(pos.y * _zoom + g2.getFont().getSize2D() / 2)); }
-		 */
+		if (ri.nodeInfo != null && ri.nodeInfo.containsKey(n.id)) {
+			String lbl = ri.nodeInfo.get(n.id);
+			Graphics g2 = g.create();
+			g2.setFont(g2.getFont().deriveFont(
+					(float) (NODE_RADIUS * 2 / 3 * _zoom)));
+
+			FontMetrics m = g2.getFontMetrics();
+
+			g2.drawString(lbl, (int) (pos.x * _zoom - m.stringWidth(lbl) / 2),
+					(int) (pos.y * _zoom + g2.getFont().getSize2D() / 2));
+		}
+
 	}
 
 	private void drawEdge(Edge e, Graphics g) {
@@ -256,22 +279,26 @@ public class Canvas extends JPanel {
 			g.drawLine(fromX, fromY, toX, toY);
 		}
 
-		Graphics g2 = g.create();
-		g2.setFont(g2.getFont().deriveFont(
-				(float) (TRANSITION_WIDTH / 2 * _zoom)));
-		String weightString = NumberFormat.getInstance(Locale.US).format(
-				e.weight);
+		if (e.weight > 0.0) {
+			Graphics g2 = g.create();
+			g2.setFont(g2.getFont().deriveFont(
+					(float) (TRANSITION_WIDTH / 2 * _zoom)));
 
-		float ratio = (float) Math.abs(fromX - toX)
-				/ ((float) Math.abs(fromY - toY) + (float) 0.1);
-		float flip = fromX < toX && fromY < toY || fromX > toX && fromY > toY ? (float) -1.0
-				: (float) 1.0;
+			String weightString = NumberFormat.getInstance(Locale.US).format(
+					e.weight);
 
-		g2.drawString(weightString, (int) ((fromX + toX) / 2 - TRANSITION_WIDTH
-				/ 4 * _zoom + (1 / ratio > 1.5 ? 1 : 1 / ratio)
-				* TRANSITION_WIDTH / 3 * _zoom), (int) ((fromY + toY) / 2
-				+ flip * TRANSITION_WIDTH / 4 * _zoom + (ratio > 1.5 ? 1
-				: ratio) * TRANSITION_WIDTH / 3 * _zoom));
+			float ratio = (float) Math.abs(fromX - toX)
+					/ ((float) Math.abs(fromY - toY) + (float) 0.1);
+			float flip = fromX < toX && fromY < toY || fromX > toX
+					&& fromY > toY ? (float) -1.0 : (float) 1.0;
+
+			g2.drawString(weightString, (int) ((fromX + toX) / 2
+					- TRANSITION_WIDTH / 4 * _zoom + (1 / ratio > 1.5 ? 1
+					: 1 / ratio) * TRANSITION_WIDTH / 3 * _zoom),
+					(int) ((fromY + toY) / 2 + flip * TRANSITION_WIDTH / 4
+							* _zoom + (ratio > 1.5 ? 1 : ratio)
+							* TRANSITION_WIDTH / 3 * _zoom));
+		}
 	}
 
 	void drawArrow(Graphics2D g, int x1, int y1, int x2, int y2) {
@@ -381,7 +408,8 @@ public class Canvas extends JPanel {
 	 * @return The color.
 	 */
 	public Color getColorForEntity(Object value, Boolean lineColor) {
-		Session s = EditorController.getCurrentSession();
+		RenderInfo ri = EditorController.getCurrentRenderInfo();
+		Session s = ri.session;
 
 		if (value instanceof Edge) {
 			if (_editor.getEditorMode() == DocumentEditor.EditorMode.Simulation) {

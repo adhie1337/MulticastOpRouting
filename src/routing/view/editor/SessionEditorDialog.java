@@ -1,6 +1,8 @@
 package routing.view.editor;
 
 import java.awt.Frame;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 
 import javax.swing.ActionMap;
 import javax.swing.GroupLayout;
@@ -25,7 +27,9 @@ import routing.view.MainFrame;
 import routing.view.SessionPanel;
 import routing.view.editor.DocumentEditor.EditorMode;
 
-public class SessionEditorDialog extends JDialog {
+public class SessionEditorDialog extends JDialog implements ComponentListener {
+	
+	public EditorMode lastMode = EditorMode.Selection;
 	
 	public static enum EditorState {
 		SelectSourceNode,
@@ -101,6 +105,7 @@ public class SessionEditorDialog extends JDialog {
 		initializeView();
 		
 		instance = this;
+		addComponentListener(this);
 		setModal(false);
 	}
 
@@ -264,20 +269,37 @@ public class SessionEditorDialog extends JDialog {
 	
 	public void showDialog() {
 		MainFrame mf = RoutingDemo.getMF();
+		lastMode = mf.getCurrentEditor().getEditorMode();
 		mf.getCurrentEditor().setEditorMode(EditorMode.SelectSourceNode);
 		RoutingDemo.getApplication().show(this);
 		shown = true;
 		mf.checkActionsState();
+
+		getRootPane().setDefaultButton(okButton);
 	}
 	
 	private void closeDialog() {
 		dispose();
 		RoutingDemo.getApplication().getMainFrame().repaint();
 		MainFrame mf = RoutingDemo.getMF();
-		mf.getCurrentEditor().setEditorMode(EditorMode.Selection);
+		mf.getCurrentEditor().setEditorMode(lastMode);
 		shown = false;
 		mf.checkActionsState();
 	}
+
+	@Override
+	public void componentHidden(ComponentEvent arg0) {
+		closeDialogAction();
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent arg0) { }
+
+	@Override
+	public void componentResized(ComponentEvent arg0) { }
+
+	@Override
+	public void componentShown(ComponentEvent arg0) { }
 
 
 }

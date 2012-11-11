@@ -75,7 +75,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 				}
 
 				nodeProperties.setNode((Node) selected);
-				RoutingDemo.getApplication().show(nodeProperties);
+				nodeProperties.showDialog();
 			} else if (selectedEdge != null) {
 				if (edgeProperties == null) {
 					edgeProperties = new EdgePropertiesDialog(RoutingDemo
@@ -83,7 +83,7 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 				}
 
 				edgeProperties.setEdge(selectedEdge);
-				RoutingDemo.getApplication().show(edgeProperties);
+				edgeProperties.showDialog();
 			}
 		}
 	}

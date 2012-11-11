@@ -115,8 +115,6 @@ public class NodePropertiesDialog extends JDialog {
 								layout.createSequentialGroup()
 										.addComponent(okButton)
 										.addComponent(cancelButton))));
-
-		getRootPane().setDefaultButton(okButton);
 	}
 
 	@Action
@@ -137,6 +135,11 @@ public class NodePropertiesDialog extends JDialog {
 		dispose();
 
 		RoutingDemo.getApplication().getMainFrame().repaint();
+	}
+	
+	public void showDialog() {
+		RoutingDemo.getApplication().show(this);
+		getRootPane().setDefaultButton(okButton);
 	}
 
 }

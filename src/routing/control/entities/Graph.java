@@ -49,6 +49,10 @@ public class Graph {
 		return value;
 	}
 	
+	public Node getNode(int id) {
+		return nodes.get(id);
+	}
+	
 	public Collection<Node> getNodeList() {
 		return nodes.values();
 	}

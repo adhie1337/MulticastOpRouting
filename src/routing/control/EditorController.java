@@ -14,6 +14,7 @@ import routing.view.MainFrame;
 import routing.view.Toolbar;
 import routing.view.editor.Canvas;
 import routing.view.editor.DocumentEditor;
+import routing.view.editor.RenderInfo;
 import routing.view.editor.DocumentEditor.EditorMode;
 import routing.view.editor.SessionEditorDialog;
 import routing.view.editor.SessionEditorDialog.EditorState;
@@ -29,14 +30,14 @@ public class EditorController {
 	 */
 	private static EditorController _instance;
 
-	private static Session currentSession;
+	private static RenderInfo currentRenderInfo;
 
-	public static Session getCurrentSession() {
-		return currentSession;
+	public static RenderInfo getCurrentRenderInfo() {
+		return currentRenderInfo == null ? new RenderInfo() : currentRenderInfo;
 	}
 
-	public static void setCurrentSession(Session currentSession) {
-		EditorController.currentSession = currentSession;
+	public static void setCurrentRenderInfo(RenderInfo currentRenderInfo) {
+		EditorController.currentRenderInfo = currentRenderInfo;
 
 		RoutingDemo.getApplication().getMainFrame().repaint();
 	}
@@ -198,7 +199,9 @@ public class EditorController {
 		Session s = new Session();
 		s.name = "session " + s.id;
 		sessionEditor.setSession(s);
-		setCurrentSession(s);
+		RenderInfo ri = new RenderInfo();
+		ri.session = s;
+		setCurrentRenderInfo(ri);
 		sessionEditor.showDialog();
 	}
 }

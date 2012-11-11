@@ -12,6 +12,8 @@ import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.ResourceMap;
 
 import routing.RoutingDemo;
+import routing.control.simulation.entities.AckPacket;
+import routing.control.simulation.entities.DataPacket;
 import routing.control.simulation.entities.NodeData;
 import routing.control.simulation.entities.Packet;
 
@@ -29,6 +31,11 @@ public class DataPanel extends JPanel {
 	private JLabel forwardersValue;
 	private JLabel reachableDestValue;
 
+	private JLabel packetIdValue;
+	private JLabel packetTypeValue;
+
+	private JLabel ackPacketDataIdValue;
+
 	public DataPanel() {
 		ApplicationContext c = Application.getInstance(RoutingDemo.class)
 				.getContext();
@@ -40,7 +47,7 @@ public class DataPanel extends JPanel {
 		initPacketPanel();
 
 		add(nodePanel, BorderLayout.NORTH);
-		add(packetPanel, BorderLayout.SOUTH);
+		add(packetPanel, BorderLayout.CENTER);
 	}
 
 	private void initNodePanel() {
@@ -50,7 +57,8 @@ public class DataPanel extends JPanel {
 
 		JLabel nodeIdLabel = new JLabel(
 				rm.getString("DataPanel.NodePanel.NodeId.Label"));
-		nodeIdValue = new JLabel("-");
+		nodeIdValue = new JLabel(
+				rm.getString("DataPanel.NodePanel.NodeId.Value.NoData"));
 
 		JLabel sessionIdLabel = new JLabel(
 				rm.getString("DataPanel.NodePanel.SessionId.Label"));
@@ -141,15 +149,97 @@ public class DataPanel extends JPanel {
 		packetPanel.setBorder(BorderFactory.createTitledBorder(rm
 				.getString("DataPanel.PacketPanel.Title")));
 
+		JLabel packetIdLabel = new JLabel(
+				rm.getString("DataPanel.PacketPanel.PacketId.Label"));
+		packetIdValue = new JLabel(
+				rm.getString("DataPanel.PacketPanel.PacketId.Value.NoData"));
+
+		JLabel packetTypeLabel = new JLabel(
+				rm.getString("DataPanel.PacketPanel.PacketType.Label"));
+		packetTypeValue = new JLabel("-");
+
 		GroupLayout layout = new GroupLayout(packetPanel);
 		packetPanel.setLayout(layout);
+		layout.setAutoCreateContainerGaps(true);
+		layout.setAutoCreateGaps(true);
+		layout.setVerticalGroup(layout.createSequentialGroup().addGroup(
+				layout.createSequentialGroup()
+						.addGroup(
+								layout.createParallelGroup(
+										GroupLayout.Alignment.CENTER)
+										.addComponent(packetIdLabel)
+										.addComponent(packetIdValue))
+						.addGroup(
+								layout.createParallelGroup(
+										GroupLayout.Alignment.CENTER)
+										.addComponent(packetTypeLabel)
+										.addComponent(packetTypeValue))));
+		layout.setHorizontalGroup(layout.createSequentialGroup().addGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addGroup(
+								layout.createSequentialGroup()
+										.addComponent(packetIdLabel)
+										.addComponent(packetIdValue))
+						.addGroup(
+								layout.createSequentialGroup()
+										.addComponent(packetTypeLabel)
+										.addComponent(packetTypeValue))));
 	}
 
 	public void setCurrentNodeData(NodeData nodeData) {
-		
+		if (nodeData != null) {
+			NodeData.SessionData sessionData = nodeData.getSessionData();
+
+			nodeIdValue.setText(Integer.toString(nodeData.getNodeId()));
+			sessionIdValue.setText(Integer.toString(nodeData.getSessionId()));
+			batchNumberValue.setText(Integer.toString(sessionData
+					.getBatchNumber()));
+			creditsValue.setText(Integer.toString(sessionData.getCredits()));
+
+			forwardersValue.setText(idsToString(sessionData.getForwarderIds()));
+			reachableDestValue.setText(idsToString(sessionData
+					.getReachableDestIds()));
+		} else {
+			nodeIdValue.setText(rm
+					.getString("DataPanel.NodePanel.NodeId.Value.NoData"));
+			sessionIdValue.setText("-");
+			batchNumberValue.setText("-");
+			creditsValue.setText("-");
+			forwardersValue.setText("-");
+			reachableDestValue.setText("-");
+		}
 	}
 
 	public void setCurrentPacket(Packet packet) {
+		if (packet != null) {
+			// attributes independent from packet type
+			packetIdValue.setText(Integer.toString(packet.getId()));
 
+			// attributes based on packet type
+			if (packet instanceof DataPacket) {
+				packetTypeValue
+						.setText(rm
+								.getString("DataPanel.PacketPanel.PacketType.Value.Data"));
+			} else if (packet instanceof AckPacket) {
+				packetTypeValue
+						.setText(rm
+								.getString("DataPanel.PacketPanel.PacketType.Value.Ack"));
+			}
+		} else {
+			packetIdValue.setText(rm
+					.getString("DataPanel.PacketPanel.PacketId.Value.NoData"));
+			packetTypeValue.setText("-");
+		}
+	}
+
+	private String idsToString(Iterable<Integer> ids) {
+		StringBuilder sb = new StringBuilder();
+
+		for (Integer id : ids) {
+			sb.append(id);
+			sb.append(", ");
+		}
+
+		return sb.toString().substring(0, -2);
 	}
 }

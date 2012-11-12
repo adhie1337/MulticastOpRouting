@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 
-import com.google.common.collect.Multimap;
-
 import routing.control.Document;
 import routing.control.entities.Graph;
 import routing.control.entities.Node;
@@ -16,8 +14,8 @@ import routing.control.entities.Session;
 import routing.control.simulation.entities.AckPacket;
 import routing.control.simulation.entities.InfoPacket;
 import routing.control.simulation.entities.NodeState;
+import routing.control.simulation.entities.NodeState.SessionState;
 import routing.control.simulation.entities.Packet;
-import routing.view.editor.RenderInfo;
 
 public class Simulation {
 
@@ -36,6 +34,15 @@ public class Simulation {
 
 	public boolean isRunning() {
 		return isRunning;
+	}
+
+	public SessionState getSessionDataByNodeId(int nodeId, int sessionId) {
+		if (nodeLogics.containsKey(nodeId)) {
+			NodeLogic logic = nodeLogics.get(nodeId);
+			return logic.getState().getSessionStateById(sessionId);
+		}
+
+		return null;
 	}
 
 	public Simulation(Document doc) {
@@ -58,14 +65,14 @@ public class Simulation {
 				if (l.getNodeId() == s.sourceId) {
 					steps.add(new Step(l, null));
 				}
-				
+
 				InfoPacket ip = infoPackets.get(s.id).get(n.id);
-				if(ip != null) {
+				if (ip != null) {
 					l.execute(ip);
 				}
 			}
 		}
-		
+
 		isRunning = true;
 	}
 
@@ -75,27 +82,29 @@ public class Simulation {
 		if (currentStep != null) {
 			Packet p = currentStep.execute();
 			HashMap<Integer, Boolean> successMap = new HashMap<Integer, Boolean>();
-			
-			for(int id : graph.getAdjacentNodeIds(p.getSourceNodeId())) {
-				double chance = graph.getWeight(id, p.getSourceNodeId());
-				boolean success = r.nextDouble() <= chance;
-				successMap.put(id, success);
-				
-				if (success) {
-					if(p instanceof AckPacket) {
-						nodeLogics.get(id).execute(p);
-					} else {
-						steps.add(new Step(nodeLogics.get(id), p));
+
+			if (p != null) {
+				for (int id : graph.getAdjacentNodeIds(p.getSourceNodeId())) {
+					double chance = graph.getWeight(id, p.getSourceNodeId());
+					boolean success = r.nextDouble() <= chance;
+					successMap.put(id, success);
+
+					if (success) {
+						if (p instanceof AckPacket) {
+							nodeLogics.get(id).execute(p);
+						} else {
+							steps.add(new Step(nodeLogics.get(id), p));
+						}
 					}
 				}
-			}	
-			
+			}
+
 			return new Transfer(p, successMap);
 		} else {
 			step = 0;
 			isRunning = false;
 		}
-		
+
 		return null;
 	}
 
@@ -150,13 +159,13 @@ public class Simulation {
 			}
 		}
 	}
-	
+
 	public void enque(NodeLogic logic) {
 		steps.add(new Step(logic, null));
 	}
 
 	public class Step {
-		
+
 		private NodeLogic logic;
 		private Packet packetToReceive;
 
@@ -177,11 +186,11 @@ public class Simulation {
 			return logic.execute(packetToReceive);
 		}
 	}
-	
+
 	public class Transfer {
 		private Packet packet;
 		private Map<Integer, Boolean> success;
-		
+
 		public Packet getPacket() {
 			return packet;
 		}

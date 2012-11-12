@@ -54,6 +54,7 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 		add(toolbar, BorderLayout.NORTH);
 
 		dataPanel = new DataPanel();
+		dataPanel.setPreferredSize(new Dimension(200, 0));
 		add(dataPanel, BorderLayout.WEST);
 
 		progressPanel = new ProgressPanel();

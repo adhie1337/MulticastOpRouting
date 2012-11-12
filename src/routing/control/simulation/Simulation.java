@@ -8,10 +8,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
-<<<<<<< HEAD
-=======
 import java.util.Set;
->>>>>>> Tried to implement storing sent packets and building act data, but it
 
 import routing.control.Document;
 import routing.control.entities.Graph;
@@ -99,10 +96,7 @@ public class Simulation {
 					successMap.put(id, success);
 
 					if (success) {
-<<<<<<< HEAD
-=======
 						currentStep.logic.getState().getSessionStateById(p.getSessionId()).sentPackets.put(p.getId(), p);
->>>>>>> Tried to implement storing sent packets and building act data, but it
 						if (p instanceof AckPacket) {
 							nodeLogics.get(id).execute(p);
 						} else {

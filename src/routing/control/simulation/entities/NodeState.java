@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
@@ -32,10 +33,6 @@ public class NodeState {
 		if (!sessionState.containsKey(sessionId)) {
 			sessionState.put(sessionId, new SessionState());
 		}
-		return sessionState.get(sessionId);
-	}
-
-	public SessionState getSessionStateById(int sessionId) {
 		return sessionState.get(sessionId);
 	}
 

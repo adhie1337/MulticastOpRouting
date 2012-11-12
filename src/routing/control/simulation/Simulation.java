@@ -1,11 +1,14 @@
 package routing.control.simulation;
 
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+import java.util.Set;
 
 import routing.control.Document;
 import routing.control.entities.Graph;
@@ -54,16 +57,19 @@ public class Simulation {
 
 	public void reset() {
 		step = 0;
-		steps = new LinkedList<Step>();
+		steps = new PriorityQueue<Step>(graph.getNodeList().size(), new StepComparer());
 		nodeLogics = new HashMap<Integer, NodeLogic>();
-
+		Set<Integer> quedIds = new HashSet<Integer>();
+		
 		for (Node n : graph.getNodeList()) {
 			NodeLogic l = new NodeLogic(n.id, this);
 			nodeLogics.put(n.id, l);
 
 			for (Session s : sessions) {
-				if (l.getNodeId() == s.sourceId) {
-					steps.add(new Step(l, null));
+				if (l.getNodeId() == s.sourceId
+						&& !quedIds.contains(l.getNodeId())) {
+					enque(l);
+					quedIds.add(l.getNodeId());
 				}
 
 				InfoPacket ip = infoPackets.get(s.id).get(n.id);
@@ -90,6 +96,7 @@ public class Simulation {
 					successMap.put(id, success);
 
 					if (success) {
+						currentStep.logic.getState().getSessionStateById(p.getSessionId()).sentPackets.put(p.getId(), p);
 						if (p instanceof AckPacket) {
 							nodeLogics.get(id).execute(p);
 						} else {
@@ -161,7 +168,11 @@ public class Simulation {
 	}
 
 	public void enque(NodeLogic logic) {
-		steps.add(new Step(logic, null));
+		enque(new Step(logic, null));
+	}
+
+	public void enque(Step s) {
+		steps.add(s);
 	}
 
 	public class Step {
@@ -204,5 +215,28 @@ public class Simulation {
 			this.packet = packet;
 			this.success = success;
 		}
+	}
+	
+	private class StepComparer implements Comparator<Step> {
+
+		@Override
+		public int compare(Step o1, Step o2) {
+			if(o1.packetToReceive == null) {
+				return o2.packetToReceive == null ? 0 : -1;
+			}
+			else if(o2.packetToReceive == null) {
+				return -1; 
+			} else if(!o1.packetToReceive.getClass().equals(o2.packetToReceive.getClass())){
+				if(o1.packetToReceive instanceof AckPacket
+						|| o1.packetToReceive instanceof InfoPacket) {
+					return -1;
+				} else if(o2.packetToReceive instanceof AckPacket
+						|| o2.packetToReceive instanceof InfoPacket) {
+					return 1;
+				}
+			}
+			return 0;
+		}
+		
 	}
 }

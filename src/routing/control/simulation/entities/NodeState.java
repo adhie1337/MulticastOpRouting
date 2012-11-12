@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.HashMultimap;
@@ -33,6 +32,10 @@ public class NodeState {
 		return sessionState.get(sessionId);
 	}
 
+	public SessionState getSessionStateById(int sessionId) {
+		return sessionState.get(sessionId);
+	}
+
 	public NodeState(int nodeId) {
 		this.nodeId = nodeId;
 		sessionState = new HashMap<Integer, SessionState>();
@@ -44,8 +47,8 @@ public class NodeState {
 
 		// destinationid, packetid, [node]
 		public HashMap<Integer, HashMultimap<Integer, Integer>> ackData;
-		
-		//public List<AckPacket> receivedAckPackets;
+
+		// public List<AckPacket> receivedAckPackets;
 		public List<DataPacket> receivedDataPackets;
 		public List<Packet> sentPackets;
 
@@ -64,7 +67,7 @@ public class NodeState {
 		public int getBatchNumber() {
 			return batchNumber;
 		}
-		
+
 		public void setBatchNumber(int batchNumber) {
 			this.batchNumber = batchNumber;
 		}
@@ -72,7 +75,7 @@ public class NodeState {
 		public int getCredits() {
 			return credits;
 		}
-		
+
 		public void setCredits(int credits) {
 			this.credits = credits;
 		}
@@ -108,7 +111,7 @@ public class NodeState {
 		} else {
 			psd = sessionState.get(packet.sessionId);
 		}
-		
+
 		return psd;
 	}
 

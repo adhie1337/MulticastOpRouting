@@ -29,6 +29,13 @@ public class NodeState {
 	}
 
 	public SessionState getSessionState() {
+		if (!sessionState.containsKey(sessionId)) {
+			sessionState.put(sessionId, new SessionState());
+		}
+		return sessionState.get(sessionId);
+	}
+
+	public SessionState getSessionStateById(int sessionId) {
 		return sessionState.get(sessionId);
 	}
 
@@ -50,14 +57,14 @@ public class NodeState {
 
 		// public List<AckPacket> receivedAckPackets;
 		public List<DataPacket> receivedDataPackets;
-		public List<Packet> sentPackets;
+		public Map<Integer, Packet> sentPackets;
 
 		private Multimap<Integer, Integer> forwarderIds;
 		private Set<Integer> reachableDestIds;
 
 		public SessionState() {
 			receivedDataPackets = new ArrayList<DataPacket>();
-			sentPackets = new ArrayList<Packet>();
+			sentPackets = new HashMap<Integer, Packet>();
 			forwarderIds = HashMultimap.create();
 			reachableDestIds = new HashSet<Integer>();
 			ackData = new HashMap<Integer, HashMultimap<Integer, Integer>>();

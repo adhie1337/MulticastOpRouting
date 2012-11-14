@@ -3,8 +3,8 @@ package routing.control.entities;
 import java.util.Vector;
 
 public class Session {
-	
-	public static final int PACKETS_PER_BATCH=10;
+
+	public static final int PACKETS_PER_BATCH = 10;
 
 	private static int nextSessionId = 1;
 
@@ -13,7 +13,7 @@ public class Session {
 	public int weight;
 
 	public int sourceId;
-	
+
 	public int batchCount;
 
 	public Vector<Integer> destinationIds;
@@ -30,7 +30,8 @@ public class Session {
 
 	@Override
 	public String toString() {
-		return (name != null ? name : "unnamed session") + " (#" + id + ", w: " + weight + ", bc: " + batchCount + ")";
+		return (name != null ? name : "unnamed session") + " (#" + id + ", w: "
+				+ weight + ", bc: " + batchCount + ")";
 	}
 
 	@Override

@@ -29,6 +29,8 @@ public class SimulationUtil {
 
 				if (!fromX.containsKey(y)) {
 					fromX.put(y, Double.POSITIVE_INFINITY);
+				} else if(i == j) {
+					fromX.put(y, 0.0);
 				} else {
 					fromX.put(y, 1.0 / fromX.get(y));
 				}

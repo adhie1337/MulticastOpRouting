@@ -14,6 +14,7 @@ import routing.control.entities.Session;
 import routing.control.simulation.Simulation;
 import routing.control.simulation.Simulation.Step;
 import routing.control.simulation.Simulation.Transfer;
+import routing.control.simulation.entities.AckPacket;
 import routing.control.simulation.entities.NodeState;
 import routing.control.simulation.entities.NodeState.SessionState;
 import routing.control.simulation.entities.Packet;
@@ -92,8 +93,8 @@ public class SimulationController {
 			ri.directedEdges = new LinkedList<RenderInfo.Edge>();
 			for (int id : d.graph.getAdjacentNodeIds(ns.getNodeId())) {
 				Color c = Color.RED;
-				if (t.getSuccess().containsKey(id) && t.getSuccess().get(id)) {
-					c = Color.GREEN;
+				if (t.getSuccess().containsKey(id) && t.getSuccess().get(id)) { 
+					c = t.getPacket() instanceof AckPacket ? Color.GREEN : Color.BLUE;
 				}
 				ri.directedEdges
 						.add(new RenderInfo.Edge(ns.getNodeId(), id, c));

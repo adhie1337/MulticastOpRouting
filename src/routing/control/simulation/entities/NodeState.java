@@ -1,9 +1,7 @@
 package routing.control.simulation.entities;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,6 +35,10 @@ public class NodeState {
 	}
 
 	public SessionState getSessionStateById(int sessionId) {
+		if(!sessionState.containsKey(sessionId)) {
+			sessionState.put(sessionId, new SessionState());
+		}
+		
 		return sessionState.get(sessionId);
 	}
 
@@ -50,21 +52,41 @@ public class NodeState {
 		private int credits;
 
 		// destinationid, packetid, [node]
+		// nodes, that ack-ed our packets, grouped by the destinations
 		public HashMap<Integer, HashMultimap<Integer, Integer>> ackData;
 
-		// public List<AckPacket> receivedAckPackets;
-		public List<DataPacket> receivedDataPackets;
+		// destinationid, packetid
+		// packets we recieved, but waiting for credit assignment to happen
+		public HashMultimap<Integer, Integer> unassignedPackets;
+
+		// all recieved data packets
+		public HashMap<Integer, DataPacket> receivedDataPackets;
+
+		// all recieved data packets
+		public int receivedDataPacketsFromBatch;
+
+		// destinationid, packetid, courrent forwarder node id
+		// a map of packets with their current forwarder id, who is got the
+		// credit to forward the packet. Grouped by destination ids.
+		public HashMap<Integer, HashMap<Integer, Integer>> creditMap;
+
+		public Set<Integer> packetsToForward;
+		
 		public Map<Integer, Packet> sentPackets;
 
 		private Multimap<Integer, Integer> forwarderIds;
 		private Set<Integer> reachableDestIds;
 
 		public SessionState() {
-			receivedDataPackets = new ArrayList<DataPacket>();
+			ackData = new HashMap<Integer, HashMultimap<Integer, Integer>>();
+			unassignedPackets = HashMultimap.create();
+			receivedDataPackets = new HashMap<Integer, DataPacket>();
+			receivedDataPacketsFromBatch = 0;
+			creditMap = new HashMap<Integer, HashMap<Integer, Integer>>();
+			packetsToForward = new HashSet<Integer>();
 			sentPackets = new HashMap<Integer, Packet>();
 			forwarderIds = HashMultimap.create();
 			reachableDestIds = new HashSet<Integer>();
-			ackData = new HashMap<Integer, HashMultimap<Integer, Integer>>();
 			batchNumber = 1;
 		}
 

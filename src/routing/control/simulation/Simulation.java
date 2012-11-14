@@ -31,6 +31,10 @@ public class Simulation {
 	private boolean isRunning;
 	private Step currentStep;
 
+	public Graph getGraph() {
+		return graph;
+	}
+	
 	public Step getCurrentStep() {
 		return currentStep;
 	}
@@ -38,6 +42,11 @@ public class Simulation {
 	public boolean isRunning() {
 		return isRunning;
 	}
+	
+	public List<Session> getSessions() {
+		return sessions;
+	}
+	
 
 	public SessionState getSessionDataByNodeId(int nodeId, int sessionId) {
 		if (nodeLogics.containsKey(nodeId)) {

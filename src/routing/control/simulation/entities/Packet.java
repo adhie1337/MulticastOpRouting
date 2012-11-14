@@ -1,5 +1,6 @@
 package routing.control.simulation.entities;
 
+
 public abstract class Packet {
 
 	private static int nextPacketId = 1;
@@ -7,6 +8,8 @@ public abstract class Packet {
 	protected int sourceNodeId;
 	protected int sessionId;
 	protected int batchNumber;
+	
+	public PacketHeader header;
 
 	public int getId() {
 		return id;
@@ -25,9 +28,10 @@ public abstract class Packet {
 	}
 
 	public Packet(int sourceNodeId, int sessionId, int batchNumber) {
-		id = nextPacketId++;
+		this.id = nextPacketId++;
 		this.sourceNodeId = sourceNodeId;
 		this.sessionId = sessionId;
 		this.batchNumber = batchNumber;
+		this.header = new PacketHeader(sessionId);
 	}
 }

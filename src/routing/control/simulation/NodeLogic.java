@@ -15,6 +15,7 @@ import routing.control.simulation.entities.Packet;
 import routing.control.simulation.entities.PacketHeader;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multiset;
 
 public class NodeLogic {
 
@@ -29,15 +30,14 @@ public class NodeLogic {
 	public int getNodeId() {
 		return state.getNodeId();
 	}
-	
+
 	private boolean isSource(int sessionId) {
-		for(Session s : simulation.getSessions()) {
-			if(s.sourceId == getNodeId()
-				&& s.id == sessionId) {
+		for (Session s : simulation.getSessions()) {
+			if (s.sourceId == getNodeId() && s.id == sessionId) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -47,6 +47,15 @@ public class NodeLogic {
 		state = new NodeState(id);
 		this.simulation = simulation;
 		creditsAssignedByCurrentNode = new HashMap<Integer, HashMap<Integer, Integer>>();
+
+		for (Session s : simulation.getSessions()) {
+			if (s.sourceId == id) {
+				state.getSessionStateById(s.id).isSource = true;
+			}
+			if (s.destinationIds.contains(id)) {
+				state.getSessionStateById(s.id).isDestination = true;
+			}
+		}
 	}
 
 	public Packet execute(Packet receivedPacket) {
@@ -69,7 +78,7 @@ public class NodeLogic {
 			packetToSend = selectPacketToSend();
 		}
 
-		return updatePacketHeader(packetToSend);
+		return updatePacket(packetToSend);
 	}
 
 	private void processPacketHeader(PacketHeader header) {
@@ -77,21 +86,31 @@ public class NodeLogic {
 			SessionState ss = state.getSessionStateById(header.sessionId);
 
 			for (int destId : ss.getReachableDestIds()) {
+				// the header contains information about this destination
+				// and we have "unassigned" packets toward this destination
 				if (header.creditMap.containsKey(destId)
 						&& ss.unassignedPackets.containsKey(destId)) {
-					HashMap<Integer, Integer> innermap = header.creditMap
+					HashMap<Integer, Integer> newCredits = header.creditMap
 							.get(destId);
 					Collection<Integer> packetIds = ss.unassignedPackets
 							.get(destId);
+					Collection<Integer> packetsToRemove = new LinkedList<Integer>();
 
+					// for each packet id in unassigned packets
 					for (int pid : packetIds) {
-						if (innermap.containsKey(pid)) {
-							if(!ss.creditMap.containsKey(destId)) {
-								ss.creditMap.put(destId, new HashMap<Integer, Integer>());
+						// if the header contains credit association, update
+						// credits
+						if (newCredits.containsKey(pid)) {
+							if (!ss.creditMap.containsKey(destId)) {
+								ss.creditMap.put(destId,
+										new HashMap<Integer, Integer>());
 							}
-							
-							int forwarderId = innermap.get(pid);
-							ss.unassignedPackets.remove(destId, pid);
+
+							// we can't delete directly from the collection we are
+							// iterating
+							packetsToRemove.add(pid);
+
+							int forwarderId = newCredits.get(pid);
 							ss.creditMap.get(destId).put(pid, forwarderId);
 
 							// if forwarderId == getNodeId() then we got the
@@ -101,6 +120,9 @@ public class NodeLogic {
 								simulation.enque(this);
 							}
 						}
+					}
+					for (int pid : packetsToRemove) {
+						ss.unassignedPackets.remove(destId, pid);
 					}
 				}
 			}
@@ -146,22 +168,18 @@ public class NodeLogic {
 					dp.getBatchNumber());
 			ap.reachableDestIds = ss.getReachableDestIds();
 			ap.dataPacketId = dp.getId();
+			ss.receivedDataPackets.put(dp.getId(), dp);
 
-			if (ss.getBatchNumber() > dp.getBatchNumber()) {
-				ap.recievedFromBatch = Session.PACKETS_PER_BATCH;
-			} else if (ss.getBatchNumber() == dp.getBatchNumber()) {
-				ss.receivedDataPackets.put(dp.getId(), dp);
-				++ss.receivedDataPacketsFromBatch;
-				ap.recievedFromBatch = ss.receivedDataPacketsFromBatch;
-
-				if (ss.receivedDataPacketsFromBatch == Session.PACKETS_PER_BATCH) {
-					ss.receivedDataPacketsFromBatch = 0;
-					ss.setBatchNumber(ss.getBatchNumber() + 1);
+			if (dp.getDestinationIds().contains(getNodeId())) {
+				if (ss.getDestBatchNumber() > dp.getBatchNumber()) {
+					ap.recievedFromBatch = Session.PACKETS_PER_BATCH;
+				} else if (ss.getDestBatchNumber() == dp.getBatchNumber()) {
+					ap.recievedFromBatch = ss.incRecievedCount();
 				}
-			}
-
-			for (int destId : dp.getDestinationIds()) {
-				ss.unassignedPackets.put(destId, dp.getId());
+			} else {
+				for (int destId : dp.getDestinationIds()) {
+					ss.unassignedPackets.put(destId, dp.getId());
+				}
 			}
 
 			return ap;
@@ -172,116 +190,143 @@ public class NodeLogic {
 
 	private Packet selectPacketToSend() {
 
-		for(int sId : getState().getSessionIds()) {
-			if(isSource(sId)) {
+		for (int sId : getState().getSessionIds()) {
+			if (isSource(sId)) {
 				SessionState ss = state.getSessionStateById(sId);
-				DataPacket dp = new DataPacket(getNodeId(), sId, ss.getBatchNumber());
+				DataPacket dp = new DataPacket(getNodeId(), sId,
+						ss.getBatchNumber());
 				dp.getDestinationIds().addAll(ss.getReachableDestIds());
 				dp.getForwarderIds().addAll(ss.getForwarderIds());
 				dp.header = new PacketHeader(sId);
 				return dp;
 			}
 		}
-		
-		for(int sId : getState().getSessionIds()) {
+
+		for (int sId : getState().getSessionIds()) {
 			SessionState ss = state.getSessionStateById(sId);
-			for(int destId : ss.getReachableDestIds()) {
+			for (int destId : ss.getReachableDestIds()) {
 				HashMap<Integer, Integer> c = ss.creditMap.get(destId);
-				for(int pId : c.keySet()) {
-					if(c.get(pId) == getNodeId()) {
+				for (int pId : c.keySet()) {
+					if (c.get(pId) == getNodeId()) {
 						return ss.receivedDataPackets.get(pId);
 					}
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
 	private void assignCredits() {
-		SessionState ss = state.getSessionState();
+		// for each session
+		for (int sId : state.getSessionIds()) {
+			SessionState ss = state.getSessionStateById(sId);
 
-		for (int destId : ss.getReachableDestIds()) {
-			if(!ss.ackData.containsKey(destId)) {
-				continue;
-			}
-			
-			if(!ss.creditMap.containsKey(destId)) {
-				ss.creditMap.put(destId, new HashMap<Integer, Integer>());
-			}
-			
-			HashMap<Integer, Integer> credits = new HashMap<Integer, Integer>();
-			HashMap<Integer, Integer> c = ss.creditMap.get(destId);
-			int mybacklog = 0;
-			for (int pId : c.keySet()) {
-				int nId = c.get(pId);
-
-				if (!credits.containsKey(nId)) {
-					credits.put(nId, 0);
+			// for each destination
+			for (int destId : ss.getReachableDestIds()) {
+				// if no one ack-ed from the destination, skip
+				if (!ss.ackData.containsKey(destId)) {
+					continue;
 				}
 
-				credits.put(nId, credits.get(nId) + 1);
-
-				if (nId == getNodeId()) {
-					++mybacklog;
+				if (!ss.creditMap.containsKey(destId)) {
+					ss.creditMap.put(destId, new HashMap<Integer, Integer>());
 				}
-			}
 
-			HashMultimap<Integer, Integer> innermap = ss.ackData.get(destId);
-			// mybacklog += simulation.getGraph().getNodeIds().size();
+				// Summary of the credits of each node (for the session and
+				// destination)
+				// node id -> credit count ("backlog")
+				HashMap<Integer, Integer> credits = new HashMap<Integer, Integer>();
+				HashMap<Integer, Integer> c = ss.creditMap.get(destId);
+				int mybacklog = 0;
+				for (int pId : c.keySet()) {
+					int nId = c.get(pId);
 
-			for (int pid : innermap.keys()) {
-				List<Integer> nodes = new LinkedList<Integer>(innermap.get(pid));
-				int idx = -1;
-				int value = 0;
+					if (!credits.containsKey(nId)) {
+						credits.put(nId, 0);
+					}
 
-				for (int i = 0; i < nodes.size(); ++i) {
-					int nBackLog = credits.containsKey(nodes.get(i)) ? credits.get(nodes.get(i)) : 0;
-					if (idx == -1 || value > nBackLog - mybacklog) {
-						idx = i;
-						value = nodes.get(i);
+					credits.put(nId, credits.get(nId) + 1);
+
+					if (nId == getNodeId()) {
+						++mybacklog;
 					}
 				}
 
-				if (idx > -1) {
-					if (!creditsAssignedByCurrentNode.containsKey(destId)) {
-						creditsAssignedByCurrentNode.put(destId,
-								new HashMap<Integer, Integer>());
+				// packet id -> node ids who ack-ed it
+				HashMultimap<Integer, Integer> innermap = ss.ackData
+						.get(destId);
+				// mybacklog += simulation.getGraph().getNodeIds().size();
+
+				Multiset<Integer> pIds = innermap.keys();
+				for (int pid : pIds) {
+					// get all nodes ack-ed packed with pid
+					List<Integer> nodes = new LinkedList<Integer>(
+							innermap.get(pid));
+					int idx = -1;
+					int value = 0;
+
+					// find max
+					for (int i = 0; i < nodes.size(); ++i) {
+						int nBackLog = credits.containsKey(nodes.get(i)) ? credits
+								.get(nodes.get(i)) : 0;
+						if (idx == -1 || value > nBackLog - mybacklog) {
+							idx = i;
+							value = nodes.get(i);
+						}
 					}
 
-					creditsAssignedByCurrentNode.get(destId).put(pid,
-							nodes.get(idx));
-					c.put(pid, nodes.get(idx));
+					// we asssigned a cerdit
+					if (idx > -1) {
+						if (!creditsAssignedByCurrentNode.containsKey(destId)) {
+							creditsAssignedByCurrentNode.put(destId,
+									new HashMap<Integer, Integer>());
+						}
+
+						creditsAssignedByCurrentNode.get(destId).put(pid,
+								nodes.get(idx));
+						c.put(pid, nodes.get(idx));
+
+						// we are source: check current batch number
+						if (isSource(sId)) {
+							HashMap<Integer, Integer> bm = ss.getBatchMap();
+							bm.put(destId, bm.get(destId) + 1);
+						}
+					}
+
+					innermap.removeAll(pid);
 				}
 			}
-
 		}
 	}
 
-	private Packet updatePacketHeader(Packet p) {
-		if(p != null) {
+	private Packet updatePacket(Packet p) {
+		if (p != null) {
+			p.SetSourceNodeId(getNodeId());
 			HashMap<Integer, HashMap<Integer, Integer>> newHeader = new HashMap<Integer, HashMap<Integer, Integer>>();
-	
+
 			// copy the credits from the original packet
 			for (int destId : p.header.creditMap.keySet()) {
-				HashMap<Integer, Integer> innermap = p.header.creditMap.get(destId);
+				HashMap<Integer, Integer> innermap = p.header.creditMap
+						.get(destId);
 				newHeader.put(destId, new HashMap<Integer, Integer>());
-	
+
 				for (int pid : innermap.keySet()) {
 					newHeader.get(destId).put(pid, innermap.get(pid));
 				}
 			}
-	
+
 			// update the credits with the ones assigned by this node
 			for (int destId : creditsAssignedByCurrentNode.keySet()) {
-				HashMap<Integer, Integer> innermap = creditsAssignedByCurrentNode.get(destId);
+				HashMap<Integer, Integer> innermap = creditsAssignedByCurrentNode
+						.get(destId);
 				newHeader.put(destId, new HashMap<Integer, Integer>());
-	
+
 				for (int pid : innermap.keySet()) {
 					newHeader.get(destId).put(pid, innermap.get(pid));
 				}
 			}
-			
+
 			p.header = new PacketHeader(p.header.sessionId);
 			p.header.creditMap = newHeader;
 		}

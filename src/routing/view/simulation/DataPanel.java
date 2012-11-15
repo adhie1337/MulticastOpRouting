@@ -33,8 +33,7 @@ public class DataPanel extends JPanel {
 
 	private JLabel packetIdValue;
 	private JLabel packetTypeValue;
-
-	private JLabel ackPacketDataIdValue;
+	private JLabel packetBatchValue;
 
 	public DataPanel() {
 		ApplicationContext c = Application.getInstance(RoutingDemo.class)
@@ -157,6 +156,10 @@ public class DataPanel extends JPanel {
 		JLabel packetTypeLabel = new JLabel(
 				rm.getString("DataPanel.PacketPanel.PacketType.Label"));
 		packetTypeValue = new JLabel("-");
+		
+		JLabel packetBatchLabel = new JLabel(
+				rm.getString("DataPanel.PacketPanel.PacketBatch.Label"));
+		packetBatchValue = new JLabel("-");
 
 		GroupLayout layout = new GroupLayout(packetPanel);
 		packetPanel.setLayout(layout);
@@ -173,7 +176,12 @@ public class DataPanel extends JPanel {
 								layout.createParallelGroup(
 										GroupLayout.Alignment.CENTER)
 										.addComponent(packetTypeLabel)
-										.addComponent(packetTypeValue))));
+										.addComponent(packetTypeValue))
+						.addGroup(
+								layout.createParallelGroup(
+										GroupLayout.Alignment.CENTER)
+										.addComponent(packetBatchLabel)
+										.addComponent(packetBatchValue))));
 		layout.setHorizontalGroup(layout.createSequentialGroup().addGroup(
 				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addGroup(
@@ -183,7 +191,11 @@ public class DataPanel extends JPanel {
 						.addGroup(
 								layout.createSequentialGroup()
 										.addComponent(packetTypeLabel)
-										.addComponent(packetTypeValue))));
+										.addComponent(packetTypeValue))
+						.addGroup(
+								layout.createSequentialGroup()
+										.addComponent(packetBatchLabel)
+										.addComponent(packetBatchValue))));
 	}
 
 	public void setCurrentNodeState(NodeState nodeState) {
@@ -230,12 +242,15 @@ public class DataPanel extends JPanel {
 			} else if (packet instanceof AckPacket) {
 				packetTypeValue
 						.setText(rm
-								.getString("DataPanel.PacketPanel.PacketType.Value.Ack"));
+								.getString("DataPanel.PacketPanel.PacketType.Value.Ack") + "(" + ((AckPacket)packet).dataPacketId + ")");
 			}
+			
+			packetBatchValue.setText(Integer.toString(packet.getBatchNumber()));
 		} else {
 			packetIdValue.setText(rm
 					.getString("DataPanel.PacketPanel.PacketId.Value.NoData"));
 			packetTypeValue.setText("-");
+			packetBatchValue.setText("-");
 		}
 	}
 

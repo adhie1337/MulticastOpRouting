@@ -91,13 +91,17 @@ public class SimulationController {
 			}
 
 			ri.directedEdges = new LinkedList<RenderInfo.Edge>();
-			for (int id : d.graph.getAdjacentNodeIds(ns.getNodeId())) {
-				Color c = Color.RED;
-				if (t.getSuccess().containsKey(id) && t.getSuccess().get(id)) { 
-					c = t.getPacket() instanceof AckPacket ? Color.GREEN : Color.BLUE;
+			if(p != null) {
+				for (int id : d.graph.getAdjacentNodeIds(p.getSourceNodeId())) {
+					Color c = Color.RED;
+					if (t.getSuccess().containsKey(id)
+							&& t.getSuccess().get(id)) {
+						c = t.getPacket() instanceof AckPacket ? Color.GREEN
+								: Color.BLUE;
+					}
+					ri.directedEdges.add(new RenderInfo.Edge(ns.getNodeId(),
+							id, c));
 				}
-				ri.directedEdges
-						.add(new RenderInfo.Edge(ns.getNodeId(), id, c));
 			}
 
 			EditorController.setCurrentRenderInfo(ri);

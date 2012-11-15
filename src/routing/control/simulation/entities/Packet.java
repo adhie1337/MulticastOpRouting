@@ -19,6 +19,10 @@ public abstract class Packet {
 		return sourceNodeId;
 	}
 
+	public void SetSourceNodeId(int sId) {
+		sourceNodeId = sId;
+	}
+
 	public int getSessionId() {
 		return sessionId;
 	}

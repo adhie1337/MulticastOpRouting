@@ -12,8 +12,10 @@ import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.ResourceMap;
 
 import routing.RoutingDemo;
+import routing.control.EditorController;
 import routing.view.MainFrame;
 import routing.view.editor.DocumentEditor.EditorMode;
+import routing.view.editor.RenderInfo;
 
 public class SimulationDialog extends JDialog implements ComponentListener {
 
@@ -35,8 +37,8 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 
 	public SimulationDialog() {
 		setModal(true);
-		setMinimumSize(new Dimension(325, 325));
-		setPreferredSize(new Dimension(325, 325));
+		setMinimumSize(new Dimension(425, 325));
+		setPreferredSize(new Dimension(425, 325));
 
 		initializeView();
 	}
@@ -85,6 +87,10 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 		MainFrame mf = RoutingDemo.getMF();
 		mf.getCurrentEditor().repaint();
 		mf.getCurrentEditor().setEditorMode(EditorMode.Selection);
+
+		RenderInfo ri = new RenderInfo();
+		ri.session = RoutingDemo.getMF().sessionPanel.getSelectedSession();
+		EditorController.setCurrentRenderInfo(ri);
 		shown = false;
 	}
 

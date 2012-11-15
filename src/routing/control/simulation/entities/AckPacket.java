@@ -10,9 +10,14 @@ public class AckPacket extends Packet {
 	// number of linearly independent received from this batch 
 	public int recievedFromBatch;
 	
+	public int originalSourceId;
+	
 	public Set<Integer> reachableDestIds;
 	
-	public AckPacket(int sourceNodeId, int sessionId, int batchNumber) {
+	public AckPacket(int sourceNodeId, int originalSourceId, int dataPacketId, int sessionId, int batchNumber) {
 		super(sourceNodeId, sessionId, batchNumber);
+		
+		this.originalSourceId = originalSourceId;
+		this.dataPacketId = dataPacketId;
 	}
 }

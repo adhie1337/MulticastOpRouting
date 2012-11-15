@@ -15,6 +15,7 @@ import routing.control.simulation.Simulation;
 import routing.control.simulation.Simulation.Step;
 import routing.control.simulation.Simulation.Transfer;
 import routing.control.simulation.entities.AckPacket;
+import routing.control.simulation.entities.DataPacket;
 import routing.control.simulation.entities.NodeState;
 import routing.control.simulation.entities.NodeState.SessionState;
 import routing.control.simulation.entities.Packet;
@@ -70,6 +71,8 @@ public class SimulationController {
 		simulationDialog.showDialog();
 	}
 
+	public static int credits;
+
 	@Action
 	public void stepSimulationAction() {
 		Transfer t = currentSimulation.step();
@@ -91,13 +94,31 @@ public class SimulationController {
 			}
 
 			ri.directedEdges = new LinkedList<RenderInfo.Edge>();
-			if(p != null) {
+			Packet init = t.getInitiator();
+			if(init != null) {
+				Color c = Color.RED;
+				if (init instanceof AckPacket) {
+					c = Color.GREEN;
+				} else if (init instanceof DataPacket) {
+					c = Color.BLUE;
+				} else {
+					c = Color.ORANGE;
+				}
+				ri.directedEdges.add(new RenderInfo.Edge(init.getSourceNodeId(),
+						ns.getNodeId(), c));
+			}
+			if (p != null) {
 				for (int id : d.graph.getAdjacentNodeIds(p.getSourceNodeId())) {
 					Color c = Color.RED;
 					if (t.getSuccess().containsKey(id)
 							&& t.getSuccess().get(id)) {
-						c = t.getPacket() instanceof AckPacket ? Color.GREEN
-								: Color.BLUE;
+						if (t.getPacket() instanceof AckPacket) {
+							c = Color.GREEN;
+						} else if (t.getPacket() instanceof DataPacket) {
+							c = Color.BLUE;
+						} else {
+							c = Color.ORANGE;
+						}
 					}
 					ri.directedEdges.add(new RenderInfo.Edge(ns.getNodeId(),
 							id, c));
@@ -113,32 +134,34 @@ public class SimulationController {
 			ri.nodeInfo = new HashMap<Integer, String>();
 
 			ProgressPanel pp = simulationDialog.getProgressPanel();
+			
+			if(ri.session == null) {
+				return;
+			}
+			
 			int maxPackets = ri.session.batchCount * Session.PACKETS_PER_BATCH;
 			for (int nodeId : d.graph.getNodeIds()) {
 				SessionState ss = currentSimulation.getSessionDataByNodeId(
 						nodeId, ri.session.id);
 				if (ss != null) {
-					if (!ri.session.destinationIds.contains(nodeId)) {
-						ri.nodeInfo.put(nodeId,
-								ss.getCredits() + ";" + ss.getBatchNumber());
-					} else {
-						ri.nodeInfo.put(nodeId, "" + ss.getBatchNumber());
+					if (ss.isSource) {
+						ri.nodeInfo.put(nodeId, "b:" + ss.getBatchNumber());
+					} else if (ss.isDestination) {
+						int packetsInCurrentBatch = ss.getReceivedCount();
+						ri.nodeInfo
+								.put(nodeId, "b:" + ss.getDestBatchNumber() + "+" + packetsInCurrentBatch);
 
-						int batchesComplete = ss.getBatchNumber() - 1;
-						int packetsInCurrentBatch = ss.receivedDataPackets
-								.size();
-						int percentage = (int) (batchesComplete
-								* Session.PACKETS_PER_BATCH + packetsInCurrentBatch
-								/ (double) maxPackets);
+						int batchesComplete = ss.getDestBatchNumber() - 1;
+						int percentage = (int) ((batchesComplete
+								* Session.PACKETS_PER_BATCH + packetsInCurrentBatch) / (double) maxPackets * 100);
 						pp.setPercentage(ri.session.id, nodeId, percentage);
+					} else {
+						ri.nodeInfo.put(nodeId, "c:" + ss.getCredits() + "(" + ss.unassignedPackets.size() + ")");
 					}
 				}
 			}
 		} else {
 			simulationDialog.getToolbar().unselectAutoStep();
-			RenderInfo ri = new RenderInfo();
-			ri.session = RoutingDemo.getMF().sessionPanel.getSelectedSession();
-			EditorController.setCurrentRenderInfo(ri);
 			RoutingDemo.getApplication().getContext().getActionMap(this)
 					.get("stepSimulationAction").setEnabled(false);
 			DataPanel dp = simulationDialog.getDataPanel();

@@ -18,6 +18,8 @@ public class RenderInfo {
 		public int fromId;
 		public int toId;
 		
+		public boolean firstHalf;
+		
 		public Color color = Color.BLACK;
 		
 		public Edge(int fromId, int toId) {
@@ -25,9 +27,14 @@ public class RenderInfo {
 		}
 		
 		public Edge(int fromId, int toId, Color color) {
+			this(fromId, toId, color, true);
+		}
+		
+		public Edge(int fromId, int toId, Color color, boolean firsthalf) {
 			this.fromId = fromId;
 			this.toId = toId;
 			this.color = color;
+			this.firstHalf = firsthalf;
 		}
 	}
 }

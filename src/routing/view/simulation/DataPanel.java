@@ -14,6 +14,7 @@ import org.jdesktop.application.ResourceMap;
 import routing.RoutingDemo;
 import routing.control.simulation.entities.AckPacket;
 import routing.control.simulation.entities.DataPacket;
+import routing.control.simulation.entities.InfoPacket;
 import routing.control.simulation.entities.NodeState;
 import routing.control.simulation.entities.Packet;
 
@@ -235,7 +236,12 @@ public class DataPanel extends JPanel {
 			packetIdValue.setText(Integer.toString(packet.getId()));
 
 			// attributes based on packet type
-			if (packet instanceof DataPacket) {
+			if(packet instanceof InfoPacket) {
+				packetTypeValue
+				.setText(rm
+						.getString("DataPanel.PacketPanel.PacketType.Value.Info"));
+				packetBatchValue.setText("-");
+			} else if (packet instanceof DataPacket) {
 				packetTypeValue
 						.setText(rm
 								.getString("DataPanel.PacketPanel.PacketType.Value.Data"));

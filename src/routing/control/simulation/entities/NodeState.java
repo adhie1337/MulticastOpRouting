@@ -2,6 +2,8 @@ package routing.control.simulation.entities;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +42,16 @@ public class NodeState {
 
 		return sessionState.get(sessionId);
 	}
+	
+	public boolean isSourceAndActive() {
+		for(SessionState s: sessionState.values()) {
+			if(s.isSource && !s.isReady()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	public NodeState(int nodeId) {
 		this.nodeId = nodeId;
@@ -49,11 +61,14 @@ public class NodeState {
 	public class SessionState {
 		private int receivedCount;
 		private int destBatchNumber;
+		private boolean ready = false;
 		
+		public int batchCount = 0;
+
 		public boolean isSource = false;
-		
+
 		public boolean isDestination = false;
-		
+
 		// Nodes, that ack-ed our packets, grouped by the destinations.
 		// destination id, packet id, [node]
 		public HashMap<Integer, HashMultimap<Integer, Integer>> ackData;
@@ -77,12 +92,12 @@ public class NodeState {
 		// credit to forward the packet. Grouped by destination identifiers.
 		public HashMap<Integer, HashMap<Integer, Integer>> creditMap;
 
-		public Set<Integer> packetsToForward;
-
 		public Map<Integer, Packet> sentPackets;
 
 		private Multimap<Integer, Integer> forwarderIds;
 		private Set<Integer> reachableDestIds;
+		
+		public List<Integer> newPackets;
 
 		public SessionState() {
 			ackData = new HashMap<Integer, HashMultimap<Integer, Integer>>();
@@ -90,20 +105,20 @@ public class NodeState {
 			receivedDataPackets = new HashMap<Integer, DataPacket>();
 			receivedDataPacketsFromBatch = 0;
 			creditMap = new HashMap<Integer, HashMap<Integer, Integer>>();
-			packetsToForward = new HashSet<Integer>();
 			sentPackets = new HashMap<Integer, Packet>();
 			forwarderIds = HashMultimap.create();
 			reachableDestIds = new HashSet<Integer>();
 			batchMap = new HashMap<Integer, Integer>();
 			receivedCount = 0;
 			destBatchNumber = 1;
+			newPackets = new LinkedList<Integer>();
 		}
 
-		public HashMap<Integer, Integer> getBatchMap() {
+		private HashMap<Integer, Integer> getBatchMap() {
 			if (batchMap.size() != reachableDestIds.size()) {
 				for (int id : reachableDestIds) {
 					if (!batchMap.containsKey(id)) {
-						batchMap.put(id, 1);
+						batchMap.put(id, 0);
 					}
 				}
 			}
@@ -111,27 +126,51 @@ public class NodeState {
 			return batchMap;
 		}
 		
+		public boolean isReady() {
+			return ready;
+		}
+
 		public int getDestBatchNumber() {
 			return destBatchNumber;
 		}
 		
+		public int getReceivedCount() {
+			return receivedCount;
+		}
+
 		public int incRecievedCount() {
-			int retVal = ++receivedCount;
-			
-			if(receivedCount == Session.PACKETS_PER_BATCH) {
-				++destBatchNumber;
-				receivedCount = 0;
+			int retVal = receivedCount;
+			if(!ready) {
+				++receivedCount;
+	
+				if (receivedCount == Session.PACKETS_PER_BATCH) {
+					if(destBatchNumber != batchCount) {
+						++destBatchNumber;
+						receivedCount = 0;
+					} else {
+						ready = true;
+					}
+				}
 			}
-			
+
 			return retVal;
+		}
+		
+		public void incPacketCount(int destId) {
+			getBatchMap().put(destId, getBatchMap().get(destId) + 1);
+			
+			if(getBatchNumber() > batchCount) {
+				ready = true;
+			}
 		}
 
 		public int getBatchNumber() {
 			int next = -1;
 
-			for (int v : batchMap.values()) {
-				if (next == -1 || next > v) {
-					next = v;
+			for (int k : getBatchMap().keySet()) {
+				int batchValue = getBatchNumber(k);
+				if (next == -1 || next > batchValue) {
+					next = batchValue;
 				}
 			}
 
@@ -139,13 +178,8 @@ public class NodeState {
 		}
 
 		public int getBatchNumber(int destId) {
-			return getBatchMap().get(destId);
-		}
-
-		public void finishBatch(int destId) {
-			HashMap<Integer, Integer> bm = getBatchMap();
-
-			bm.put(destId, bm.get(destId) + 1);
+			return (getBatchMap().get(destId) + Session.PACKETS_PER_BATCH)
+					/ Session.PACKETS_PER_BATCH;
 		}
 
 		public int getCredits() {
@@ -216,7 +250,11 @@ public class NodeState {
 			psd = sessionState.get(packet.sessionId);
 		}
 
-		psd.forwarderIds = packet.forwarderIds;
-		psd.reachableDestIds = packet.reachableDestIds;
+		if(packet.forwarderIds.size() > 0) {
+			psd.forwarderIds = packet.forwarderIds;
+		}
+		if(packet.reachableDestIds.size() > 0) {
+			psd.reachableDestIds = packet.reachableDestIds;
+		}
 	}
 }

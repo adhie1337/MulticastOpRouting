@@ -56,8 +56,6 @@ public class CanvasMouseSetPropertiesListener extends CanvasMouseListener {
 				}
 			}
 
-			System.out.println("");
-
 			Iterator<Node> nodeIt = net.getNodeList().iterator();
 
 			while (nodeIt.hasNext()) {

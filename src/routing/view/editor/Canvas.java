@@ -186,7 +186,7 @@ public class Canvas extends JPanel {
 					e.weight = 0d;
 					e.from = from;
 					e.to = to;
-					drawEdge(e, g, re.color, true);
+					drawEdge(e, g, re.color, true, true);
 				}
 			}
 		}
@@ -215,15 +215,16 @@ public class Canvas extends JPanel {
 					(int) (2 * HIGHLIGHTED_RADIUS * _zoom));
 		}
 
-		if (n.label != null && !n.label.trim().equals("")) {
+		String label = n.label == null ? "id: " + n.id : n.label;
+		if (label != null && !label.trim().equals("")) {
 			Graphics g2 = g.create();
 			g2.setFont(g2.getFont().deriveFont(
 					(float) (NODE_RADIUS * 2 / 3 * _zoom)));
 
 			FontMetrics m = g2.getFontMetrics();
 
-			g2.drawString(n.label, (int) (pos.x * _zoom - m
-					.stringWidth(n.label) / 2), (int) ((pos.y - NODE_RADIUS)
+			g2.drawString(label, (int) (pos.x * _zoom - m
+					.stringWidth(label) / 2), (int) ((pos.y - NODE_RADIUS)
 					* _zoom - g2.getFont().getSize2D() / 2));
 		}
 
@@ -242,10 +243,14 @@ public class Canvas extends JPanel {
 	}
 
 	private void drawEdge(Edge e, Graphics g) {
-		drawEdge(e, g, null, false);
+		drawEdge(e, g, null, false, false);
 	}
 
 	private void drawEdge(Edge e, Graphics g, Color c, boolean drawArrow) {
+		drawEdge(e, g, c, drawArrow, false);
+	}
+	
+	private void drawEdge(Edge e, Graphics g, Color c, boolean drawArrow, boolean drawHalf) {
 
 		if (!shouldBeDrawn(e))
 			return;
@@ -272,6 +277,11 @@ public class Canvas extends JPanel {
 				fromPos.x, fromPos.y, NODE_RADIUS + 1);
 		toX = toPoint.x;
 		toY = toPoint.y;
+		
+		if(drawHalf) {
+			toX = fromX + ((toX - fromX) / 2);
+			toY = fromY + ((toY - fromY) / 2);
+		}
 
 		if (drawArrow) {
 			drawArrow((Graphics2D) g.create(), fromX, fromY, toX, toY);

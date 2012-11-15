@@ -15,6 +15,7 @@ import routing.control.entities.Graph;
 import routing.control.entities.Node;
 import routing.control.entities.Session;
 import routing.control.simulation.entities.AckPacket;
+import routing.control.simulation.entities.DataPacket;
 import routing.control.simulation.entities.InfoPacket;
 import routing.control.simulation.entities.NodeState;
 import routing.control.simulation.entities.NodeState.SessionState;
@@ -106,16 +107,12 @@ public class Simulation {
 
 					if (success) {
 						currentStep.logic.getState().getSessionStateById(p.getSessionId()).sentPackets.put(p.getId(), p);
-						if (p instanceof AckPacket) {
-							nodeLogics.get(id).execute(p);
-						} else {
-							steps.add(new Step(nodeLogics.get(id), p));
-						}
+						steps.add(new Step(nodeLogics.get(id), p));
 					}
 				}
 			}
 
-			return new Transfer(p, successMap);
+			return new Transfer(p, successMap, currentStep.getPacketToReceive());
 		} else {
 			step = 0;
 			isRunning = false;
@@ -166,7 +163,8 @@ public class Simulation {
 					for (int destId : pk.reachableDestIds) {
 						for (int otherNodeId : graph.getNodeIds()) {
 							if (mtx.get(otherNodeId).get(destId) < mtx.get(
-									nodeId).get(destId)) {
+									nodeId).get(destId)
+									&& !s.destinationIds.contains(otherNodeId)) {
 								pk.forwarderIds.put(destId, otherNodeId);
 							}
 						}
@@ -208,6 +206,8 @@ public class Simulation {
 	}
 
 	public class Transfer {
+		private Packet initiator;
+		
 		private Packet packet;
 		private Map<Integer, Boolean> success;
 
@@ -215,36 +215,42 @@ public class Simulation {
 			return packet;
 		}
 
+		public Packet getInitiator() {
+			return initiator;
+		}
+
 		public Map<Integer, Boolean> getSuccess() {
 			return success;
 		}
 
-		public Transfer(Packet packet, Map<Integer, Boolean> success) {
+		public Transfer(Packet packet, Map<Integer, Boolean> success, Packet initiator) {
 			super();
 			this.packet = packet;
 			this.success = success;
+			this.initiator = initiator;
 		}
 	}
 	
 	private class StepComparer implements Comparator<Step> {
-
 		@Override
 		public int compare(Step o1, Step o2) {
+			int retVal = 0;
+			
 			if(o1.packetToReceive == null) {
-				return o2.packetToReceive == null ? 0 : -1;
+				retVal = o2.packetToReceive == null ? 0 : 1;
 			}
 			else if(o2.packetToReceive == null) {
-				return -1; 
+				retVal = -1;
 			} else if(!o1.packetToReceive.getClass().equals(o2.packetToReceive.getClass())){
 				if(o1.packetToReceive instanceof AckPacket
 						|| o1.packetToReceive instanceof InfoPacket) {
-					return -1;
+					retVal = -1;
 				} else if(o2.packetToReceive instanceof AckPacket
 						|| o2.packetToReceive instanceof InfoPacket) {
-					return 1;
+					retVal = 1;
 				}
 			}
-			return 0;
+			return retVal;
 		}
 		
 	}

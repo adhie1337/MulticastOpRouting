@@ -160,31 +160,7 @@ public class GraphUtil {
 		return retVal;
 	}
 
-	private static String trimString(String value) {
-		int begin = 0;
-		int end = value.length();
-
-		for (int i = 0; i < value.length(); ++i) {
-			String at = value.substring(i, i + 1);
-
-			if ((begin >= i - 1) && (at.equals(" ") || at.equals("{"))) {
-				++begin;
-			}
-		}
-
-		for (int i = value.length() - 1; i > 0; --i) {
-			String at = value.substring(i, i + 1);
-
-			if ((begin >= i - 1) && (at.equals(" ") || at.equals("}"))) {
-				--end;
-			}
-		}
-
-		return value.substring(begin, end);
-	}
-
 	private static void parseOneEdge(List<String> line, Graph net) {
-		Edge retVal = null;
 		Integer i = 0;
 
 		if (!line.get(i).equals("e")) {
@@ -210,8 +186,8 @@ public class GraphUtil {
 	}
 
 	/**
-	 * A conversion function that converts a graph object to a mor file
-	 * content string.
+	 * A conversion function that converts a graph object to a mor file content
+	 * string.
 	 * 
 	 * @param value
 	 *            the graph object

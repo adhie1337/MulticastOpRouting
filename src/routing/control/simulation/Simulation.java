@@ -15,7 +15,6 @@ import routing.control.entities.Graph;
 import routing.control.entities.Node;
 import routing.control.entities.Session;
 import routing.control.simulation.entities.AckPacket;
-import routing.control.simulation.entities.DataPacket;
 import routing.control.simulation.entities.InfoPacket;
 import routing.control.simulation.entities.NodeState;
 import routing.control.simulation.entities.NodeState.SessionState;
@@ -31,11 +30,12 @@ public class Simulation {
 	private Random r;
 	private boolean isRunning;
 	private Step currentStep;
+	private HashMap<Integer, HashMap<Integer, Double>> etxMatrix;
 
 	public Graph getGraph() {
 		return graph;
 	}
-	
+
 	public Step getCurrentStep() {
 		return currentStep;
 	}
@@ -43,11 +43,19 @@ public class Simulation {
 	public boolean isRunning() {
 		return isRunning;
 	}
-	
+
 	public List<Session> getSessions() {
 		return sessions;
 	}
 	
+	public Session getSessionById(int id) {
+		for(Session s : sessions) {
+			if(s.id == id) {
+				return s;
+			}
+		}
+		return null;
+	}
 
 	public SessionState getSessionDataByNodeId(int nodeId, int sessionId) {
 		if (nodeLogics.containsKey(nodeId)) {
@@ -67,10 +75,11 @@ public class Simulation {
 
 	public void reset() {
 		step = 0;
-		steps = new PriorityQueue<Step>(graph.getNodeList().size(), new StepComparer());
+		steps = new PriorityQueue<Step>(graph.getNodeList().size(),
+				new StepComparer());
 		nodeLogics = new HashMap<Integer, NodeLogic>();
 		Set<Integer> quedIds = new HashSet<Integer>();
-		
+
 		for (Node n : graph.getNodeList()) {
 			NodeLogic l = new NodeLogic(n.id, this);
 			nodeLogics.put(n.id, l);
@@ -106,7 +115,8 @@ public class Simulation {
 					successMap.put(id, success);
 
 					if (success) {
-						currentStep.logic.getState().getSessionStateById(p.getSessionId()).sentPackets.put(p.getId(), p);
+						currentStep.logic.getState().getSessionStateById(
+								p.getSessionId()).sentPackets.put(p.getId(), p);
 						steps.add(new Step(nodeLogics.get(id), p));
 					}
 				}
@@ -131,8 +141,7 @@ public class Simulation {
 		step = 0;
 		r = new Random();
 
-		HashMap<Integer, HashMap<Integer, Double>> mtx = SimulationUtil
-				.createFloydMatrix(graph);
+		etxMatrix = SimulationUtil.createFloydMatrix(graph);
 
 		infoPackets = new HashMap<Integer, HashMap<Integer, InfoPacket>>();
 		for (Session s : sessions) {
@@ -148,8 +157,8 @@ public class Simulation {
 					sessionPackets.put(nodeId, pk);
 
 					for (int destId : s.destinationIds) {
-						if (mtx.get(nodeId).get(destId) < mtx.get(s.sourceId)
-								.get(destId)) {
+						if (etxMatrix.get(nodeId).get(destId) < etxMatrix.get(
+								s.sourceId).get(destId)) {
 							pk.reachableDestIds.add(destId);
 						}
 					}
@@ -162,8 +171,8 @@ public class Simulation {
 
 					for (int destId : pk.reachableDestIds) {
 						for (int otherNodeId : graph.getNodeIds()) {
-							if (mtx.get(otherNodeId).get(destId) < mtx.get(
-									nodeId).get(destId)
+							if (etxMatrix.get(otherNodeId).get(destId) < etxMatrix
+									.get(nodeId).get(destId)
 									&& !s.destinationIds.contains(otherNodeId)) {
 								pk.forwarderIds.put(destId, otherNodeId);
 							}
@@ -172,6 +181,14 @@ public class Simulation {
 				}
 			}
 		}
+	}
+	
+	public double getETXBeteen(int nodeId, int otherNodeId) {
+		if(etxMatrix != null) {
+			return etxMatrix.get(nodeId).get(otherNodeId);
+		}
+		
+		return Double.POSITIVE_INFINITY;
 	}
 
 	public void enque(NodeLogic logic) {
@@ -207,7 +224,7 @@ public class Simulation {
 
 	public class Transfer {
 		private Packet initiator;
-		
+
 		private Packet packet;
 		private Map<Integer, Boolean> success;
 
@@ -223,35 +240,36 @@ public class Simulation {
 			return success;
 		}
 
-		public Transfer(Packet packet, Map<Integer, Boolean> success, Packet initiator) {
+		public Transfer(Packet packet, Map<Integer, Boolean> success,
+				Packet initiator) {
 			super();
 			this.packet = packet;
 			this.success = success;
 			this.initiator = initiator;
 		}
 	}
-	
+
 	private class StepComparer implements Comparator<Step> {
 		@Override
 		public int compare(Step o1, Step o2) {
 			int retVal = 0;
-			
-			if(o1.packetToReceive == null) {
+
+			if (o1.packetToReceive == null) {
 				retVal = o2.packetToReceive == null ? 0 : 1;
-			}
-			else if(o2.packetToReceive == null) {
+			} else if (o2.packetToReceive == null) {
 				retVal = -1;
-			} else if(!o1.packetToReceive.getClass().equals(o2.packetToReceive.getClass())){
-				if(o1.packetToReceive instanceof AckPacket
+			} else if (!o1.packetToReceive.getClass().equals(
+					o2.packetToReceive.getClass())) {
+				if (o1.packetToReceive instanceof AckPacket
 						|| o1.packetToReceive instanceof InfoPacket) {
 					retVal = -1;
-				} else if(o2.packetToReceive instanceof AckPacket
+				} else if (o2.packetToReceive instanceof AckPacket
 						|| o2.packetToReceive instanceof InfoPacket) {
 					retVal = 1;
 				}
 			}
 			return retVal;
 		}
-		
+
 	}
 }

@@ -2,26 +2,26 @@ package routing.view;
 
 import java.awt.BorderLayout;
 
-import routing.view.editor.DocumentEditor;
-import routing.view.editor.DocumentEditor.EditorMode;
-import routing.view.editor.SessionEditorDialog;
-
-import javax.swing.event.ChangeEvent;
 import javax.swing.ActionMap;
-import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import org.jdesktop.application.Action;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.FrameView;
-import routing.control.DocumentController;
+
+import routing.RoutingDemo;
 import routing.control.Document;
+import routing.control.DocumentController;
 import routing.control.EditorController;
 import routing.control.SimulationController;
-import routing.RoutingDemo;
+import routing.view.editor.DocumentEditor;
+import routing.view.editor.DocumentEditor.EditorMode;
+import routing.view.editor.SessionEditorDialog;
 
 /**
  * The main window of the application. Can handle multiple editors.
@@ -180,14 +180,6 @@ public class MainFrame extends FrameView implements ChangeListener {
 		tabbedPane.setTitleAt(tabbedPane.getSelectedIndex(),
 				document.documentName);
 	}
-
-	/**
-	 * Returns the toolbar instance.
-	 */
-	private Toolbar getToolbar() {
-		return (Toolbar) getToolBar();
-	}
-
 	/**
 	 * Changes the current document to the one inside the current file.
 	 * 

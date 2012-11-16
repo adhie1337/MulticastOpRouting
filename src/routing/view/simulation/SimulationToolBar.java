@@ -25,8 +25,6 @@ import routing.control.SimulationController;
 public class SimulationToolBar extends JPanel implements ItemListener,
 		ActionListener {
 
-	private static SimulationToolBar toolBarInstance;
-
 	private Timer timer;
 
 	private JButton btnStep;
@@ -36,7 +34,6 @@ public class SimulationToolBar extends JPanel implements ItemListener,
 	private JCheckBox chkAuto;
 
 	public SimulationToolBar() {
-		toolBarInstance = this;
 		timer = new Timer(1000, this);
 		initializeView();
 	}

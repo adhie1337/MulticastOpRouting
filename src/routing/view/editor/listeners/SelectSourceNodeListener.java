@@ -4,7 +4,6 @@ import java.awt.event.MouseEvent;
 import java.util.Iterator;
 
 import routing.RoutingDemo;
-import routing.control.EditorController;
 import routing.control.entities.Graph;
 import routing.control.entities.Node;
 import routing.view.MainFrame;

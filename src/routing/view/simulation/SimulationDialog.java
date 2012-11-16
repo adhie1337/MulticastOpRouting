@@ -34,6 +34,18 @@ public class SimulationDialog extends JDialog implements ComponentListener {
 	public ProgressPanel getProgressPanel() {
 		return progressPanel;
 	}
+	
+	public void updateStep(int step) {
+		ApplicationContext c = Application.getInstance(RoutingDemo.class)
+				.getContext();
+		ResourceMap res = c.getResourceMap(SimulationDialog.class);
+		if(step == -1) {
+			setTitle(res.getString("SimulationDialog.Title"));
+		} else {
+			setTitle(res.getString("SimulationDialog.TitleWithStep") + " " + step);
+		}
+		
+	}
 
 	public SimulationDialog() {
 		setModal(true);

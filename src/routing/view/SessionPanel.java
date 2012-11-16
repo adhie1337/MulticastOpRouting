@@ -1,14 +1,6 @@
 package routing.view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.ResourceBundle;
 import java.util.Vector;
 
 import javax.swing.ActionMap;
@@ -30,7 +22,6 @@ import routing.RoutingDemo;
 import routing.control.Document;
 import routing.control.EditorController;
 import routing.control.entities.Session;
-import routing.control.simulation.SimulationUtil;
 import routing.view.editor.RenderInfo;
 
 public class SessionPanel extends JPanel implements ListSelectionListener {

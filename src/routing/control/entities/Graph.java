@@ -13,8 +13,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 
-import com.sun.java.swing.plaf.windows.WindowsTreeUI.CollapsedIcon;
-
 import routing.util.CompareUtil;
 
 /**

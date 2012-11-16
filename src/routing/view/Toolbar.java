@@ -1,23 +1,19 @@
 package routing.view;
 
-import java.awt.TextField;
-
 import javax.swing.ActionMap;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ApplicationContext;
 import org.jdesktop.application.ResourceMap;
+
+import routing.RoutingDemo;
 import routing.control.DocumentController;
 import routing.control.EditorController;
 import routing.control.SimulationController;
-import routing.RoutingDemo;
 
 /**
  * The class of the applications toolbar. Not that interesting.

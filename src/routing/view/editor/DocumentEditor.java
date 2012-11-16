@@ -116,6 +116,10 @@ public class DocumentEditor extends JPanel {
 				_currentMouseListener = new SetDestinationNodesListener(this);
 				setSelection(new LinkedList<Node>());
 				break;
+			case Simulation:
+				_currentMouseListener = null;
+				setSelection(new LinkedList<Node>());
+				break;
 			}
 		}
 

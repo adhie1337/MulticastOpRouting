@@ -133,6 +133,7 @@ public class SimulationController {
 
 			ri.nodeInfo = new HashMap<Integer, String>();
 
+			simulationDialog.updateStep(currentSimulation.getStep());
 			ProgressPanel pp = simulationDialog.getProgressPanel();
 			
 			if(ri.session == null) {

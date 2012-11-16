@@ -15,7 +15,6 @@ import routing.view.Toolbar;
 import routing.view.editor.Canvas;
 import routing.view.editor.DocumentEditor;
 import routing.view.editor.RenderInfo;
-import routing.view.editor.DocumentEditor.EditorMode;
 import routing.view.editor.SessionEditorDialog;
 import routing.view.editor.SessionEditorDialog.EditorState;
 

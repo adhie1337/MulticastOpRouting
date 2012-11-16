@@ -2,9 +2,9 @@ package routing.view.editor.listeners;
 
 import java.awt.event.MouseEvent;
 import java.util.Iterator;
-import routing.control.entities.Edge;
-import routing.control.entities.Node;
+
 import routing.control.entities.Graph;
+import routing.control.entities.Node;
 import routing.view.editor.DocumentEditor;
 
 /**

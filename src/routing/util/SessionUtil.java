@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Vector;
 
 import routing.control.ApplicationException;
-import routing.control.entities.Node;
 import routing.control.entities.Session;
 
 public class SessionUtil {

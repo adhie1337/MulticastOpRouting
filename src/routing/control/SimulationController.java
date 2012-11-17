@@ -76,6 +76,26 @@ public class SimulationController {
 	@Action
 	public void stepSimulationAction() {
 		Transfer t = currentSimulation.step();
+		boolean done = true;
+		
+		// if we stopped, we have to make sure that all detinations ack-ed the last packets
+		if(!currentSimulation.isRunning()) {
+			for(Session s : currentSimulation.getSessions()) {
+				for(int destId : s.destinationIds) {
+					if(done) {
+						break;
+					}
+					
+					SessionState st = currentSimulation.getSessionDataByNodeId(destId, s.id);
+					if(!st.isReady()) {
+						done = true;
+						// if not so, we force to restart
+						currentSimulation.enque(currentSimulation.getLogicByNodeId(s.sourceId));
+					}
+				}
+			}
+		}
+		
 		if (currentSimulation.isRunning()) {
 			Packet p = t.getPacket();
 			Step s = currentSimulation.getCurrentStep();

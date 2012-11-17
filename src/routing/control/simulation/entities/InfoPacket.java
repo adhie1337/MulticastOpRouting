@@ -17,4 +17,23 @@ public class InfoPacket extends Packet {
 		forwarderIds = HashMultimap.create();
 		reachableDestIds = new HashSet<Integer>();
 	}
+
+	@Override
+	public Object clone() {
+		InfoPacket retVal = new InfoPacket(sessionId);
+		retVal.id = this.id;
+		retVal.header = (PacketHeader)header.clone();
+		
+		for(int i : reachableDestIds) {
+			retVal.reachableDestIds.add(i);
+		}
+		
+		for(int i : forwarderIds.keySet()) {
+			for(int j : forwarderIds.get(i)) {
+				retVal.forwarderIds.put(i, j);
+			}
+		}
+		
+		return retVal;
+	}
 }

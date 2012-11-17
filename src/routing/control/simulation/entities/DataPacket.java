@@ -3,6 +3,8 @@ package routing.control.simulation.entities;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.xml.crypto.Data;
+
 public class DataPacket extends Packet {
 
 	private Set<Integer> forwarderIds;
@@ -23,4 +25,20 @@ public class DataPacket extends Packet {
 		destinationIds = new HashSet<Integer>();
 	}
 
+	@Override
+	public Object clone() {
+		DataPacket retVal = new DataPacket(sourceNodeId, sessionId, batchNumber);
+		retVal.id = this.id;
+		retVal.header = (PacketHeader)header.clone();
+		
+		for(int i : forwarderIds) {
+			retVal.forwarderIds.add(i);
+		}
+		
+		for(int i : destinationIds) {
+			retVal.destinationIds.add(i);
+		}
+		
+		return retVal;
+	}
 }

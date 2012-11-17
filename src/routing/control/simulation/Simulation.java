@@ -56,6 +56,14 @@ public class Simulation {
 		}
 		return null;
 	}
+	
+	public NodeLogic getLogicByNodeId(int nodeId) {
+		if (nodeLogics.containsKey(nodeId)) {
+			return nodeLogics.get(nodeId);
+		}
+
+		return null;
+	}
 
 	public SessionState getSessionDataByNodeId(int nodeId, int sessionId) {
 		if (nodeLogics.containsKey(nodeId)) {
@@ -196,7 +204,8 @@ public class Simulation {
 	}
 
 	public void enque(Step s) {
-		steps.add(s);
+		isRunning = true;
+		steps.add(new Step(s.logic, s.packetToReceive != null ? (Packet)s.packetToReceive.clone() : null));
 	}
 
 	public class Step {

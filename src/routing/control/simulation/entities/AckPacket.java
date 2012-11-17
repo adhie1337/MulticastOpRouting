@@ -1,5 +1,6 @@
 package routing.control.simulation.entities;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class AckPacket extends Packet {
@@ -19,5 +20,20 @@ public class AckPacket extends Packet {
 		
 		this.originalSourceId = originalSourceId;
 		this.dataPacketId = dataPacketId;
+		
+		this.reachableDestIds = new HashSet<Integer>();
+	}
+
+	@Override
+	public Object clone() {
+		AckPacket retVal = new AckPacket(sourceNodeId, originalSourceId, dataPacketId, sessionId, batchNumber);
+		retVal.id = this.id;
+		retVal.header = (PacketHeader)header.clone();
+		
+		for(int i : reachableDestIds) {
+			retVal.reachableDestIds.add(i);
+		}
+		
+		return retVal;
 	}
 }

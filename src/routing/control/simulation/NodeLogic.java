@@ -9,7 +9,7 @@ import java.util.Set;
 
 import routing.control.entities.Session;
 import routing.control.simulation.entities.AckPacket;
-import routing.control.simulation.entities.CreditAssignment;
+import routing.control.simulation.entities.Credit;
 import routing.control.simulation.entities.DataPacket;
 import routing.control.simulation.entities.InfoPacket;
 import routing.control.simulation.entities.NodeState;
@@ -21,7 +21,7 @@ import com.google.common.collect.HashMultimap;
 
 public class NodeLogic {
 
-	private boolean creditsChanged;
+	private boolean creditsChangeNotification;
 
 	private NodeState state;
 
@@ -91,23 +91,6 @@ public class NodeLogic {
 			}
 		}
 
-		if (state != null && state.getSessionState() != null) {
-			Set<Integer> s = new HashSet<Integer>(
-					state.getSessionState().unassignedPackets.values());
-			if (s.size() != 0) {
-				System.out.print(getNodeId() + ": ");
-
-				for (int i : s) {
-					System.out
-							.print(state.getSessionState().receivedDataPackets
-									.get(i).getBatchNumber() + ", ");
-				}
-
-				System.out.println();
-				System.out.println();
-			}
-		}
-
 		// before sending, we update the packet's MORE header with our credit
 		// assignment modifications
 		return updatePacket(packetToSend);
@@ -116,55 +99,59 @@ public class NodeLogic {
 	// processes a packet header (it updates it's credit map based on the MORE
 	// header's credit map
 	private void processPacketHeader(PacketHeader header) {
-		creditsChanged = false;
+		creditsChangeNotification = false;
 		if (header != null) {
 			SessionState ss = state.getSessionStateById(header.sessionId);
-			HashMap<Integer, HashMap<Integer, CreditAssignment>> credits = ss.creditMap;
 			HashMultimap<Integer, Integer> unassignedPs = ss.unassignedPackets;
 
 			// for all destinations (we also need the ones we can't reach,
 			// because we have to throw away their packets)
-			for (int dId : simulation.getSessionById(header.sessionId).destinationIds) {
-				HashMap<Integer, CreditAssignment> hCredits = header.creditMap
-						.get(dId);
+			if (simulation.getSessionById(header.sessionId) == null) {
+				return;
+			}
 
-				// if the header has some information
-				if (hCredits != null) {
+			for (int dId : header.creditMap.keySet()) {
+				HashMap<Integer, Credit> hCredits = header.creditMap.get(dId);
+				if (!ss.creditMap.containsKey(dId)) {
+					ss.creditMap.put(dId, new HashMap<Integer, Credit>());
+				}
+				HashMap<Integer, Credit> credits = ss.creditMap.get(dId);
 
-					// for each packet id in the assignments of the header
-					for (int pid : hCredits.keySet()) {
-						if (!credits.containsKey(dId)) {
-							credits.put(dId,
-									new HashMap<Integer, CreditAssignment>());
+				// for each packet id in the assignments of the header
+				for (int pid : hCredits.keySet()) {
+					Credit a = hCredits.get(pid);
+					Credit o = credits.get(pid);
+
+					// if we are notified of an older assignment, spread an info
+					// packet with the new assignment
+					if (o != null && a.assignmentStep < o.assignmentStep) {
+						creditsChangeNotification = true;
+					}
+
+					// if we didn't know about this association
+					if (!credits.containsKey(pid)
+							// or we are being notified of a new forwarder
+							|| o.assignmentStep < a.assignmentStep) {
+
+						// we knew the packet, but stored it as "unassigned"
+						if (unassignedPs.containsKey(dId)
+								&& unassignedPs.get(dId).contains(pid)
+								&& a.destinationId == dId) {
+							unassignedPs.remove(dId, pid);
 						}
 
-						CreditAssignment a = hCredits.get(pid);
+						creditsChangeNotification = true;
+						credits.put(pid, a);
 
-						// if we didn't know about this association
-						if (!credits.get(dId).containsKey(pid)
-						// or this is a newer forwarder
-								|| credits.get(dId).get(pid).assignmentStep < a.assignmentStep) {
-
-							// we knew the packet, but stored it as "unassigned"
-							if (unassignedPs.containsKey(dId)
-									&& unassignedPs.get(dId).contains(pid)) {
-								unassignedPs.remove(dId, pid);
-							}
-
-							if (a.nodeId != -1) {
-								creditsChanged = true;
-								credits.get(dId).put(pid, a);
-
-								// if forwarderId == getNodeId() then we got the
-								// credit: enque ourselves to send the packet
-								// next
-								// time
-								if (a.nodeId == getNodeId()) {
-									simulation.enque(this);
-								}
-							}
+						// if forwarderId == getNodeId() then we got the
+						// credit: enque ourselves to send the packet
+						// next
+						// time
+						if (a.nodeId == getNodeId()) {
+							simulation.enque(this);
 						}
 					}
+
 				}
 			}
 		}
@@ -303,12 +290,13 @@ public class NodeLogic {
 					continue;
 				}
 
-				HashMap<Integer, CreditAssignment> c = ss.creditMap.get(destId);
+				HashMap<Integer, Credit> c = ss.creditMap.get(destId);
 				// for each packet going to that direction
 				for (int pId : c.keySet()) {
 					// if we are the current forwarder of that packet, we
 					// forward it
 					if (c.get(pId).nodeId == getNodeId()
+							&& ss.receivedDataPackets.get(pId) != null
 							&& (chosenPid == -1 || chosenBatch > ss.receivedDataPackets
 									.get(pId).getBatchNumber())) {
 						chosenPid = pId;
@@ -343,15 +331,14 @@ public class NodeLogic {
 				}
 
 				if (!ss.creditMap.containsKey(destId)) {
-					ss.creditMap.put(destId,
-							new HashMap<Integer, CreditAssignment>());
+					ss.creditMap.put(destId, new HashMap<Integer, Credit>());
 				}
 
 				// Summary of the credits of each node (for the session and
 				// destination)
 				// node id -> credit count ("backlog")
 				HashMap<Integer, Integer> credits = new HashMap<Integer, Integer>();
-				HashMap<Integer, CreditAssignment> c = ss.creditMap.get(destId);
+				HashMap<Integer, Credit> c = ss.creditMap.get(destId);
 				for (int pId : c.keySet()) {
 					int nId = c.get(pId).nodeId;
 
@@ -370,11 +357,21 @@ public class NodeLogic {
 				Set<Integer> packetsToRemove = new HashSet<Integer>();
 				Set<Integer> pIds = new HashSet<Integer>(ackmap.keys());
 				for (int pid : pIds) {
+					// if no one ack-ed the packet spread a message to drop it
 					if (ackmap.get(pid).contains(-1)) {
 						ackmap.remove(pid, -1);
 						if (ackmap.size() == 0) {
-							c.put(pid, new CreditAssignment(-1, pid, destId,
-									simulation.getStep()));
+							c.put(pid,
+									new Credit(-1, pid, destId, simulation
+											.getStep()));
+							int pidx = ss.newPackets.indexOf(pid);
+
+							if (pidx != -1) {
+								ss.newPackets.remove(pidx);
+							}
+
+							packetsToRemove.add(pid);
+							creditsChangeNotification = true;
 						}
 					}
 					// get all nodes ack-ed packed with pid
@@ -409,16 +406,16 @@ public class NodeLogic {
 							ss.newPackets.remove(pidx);
 						}
 
-						c.put(pid, new CreditAssignment(nodes.get(idx), pid,
-								destId, simulation.getStep()));
+						c.put(pid, new Credit(nodes.get(idx), pid, destId,
+								simulation.getStep()));
 
 						// we are source: check current batch number
 						if (ss.isSource) {
-							ss.incPacketCount(destId);
+							ss.incSentPacketCount(destId, ss.getBatchNumber());
 						}
 
 						packetsToRemove.add(pid);
-						creditsChanged = true;
+						creditsChangeNotification = true;
 					}
 				}
 
@@ -430,42 +427,27 @@ public class NodeLogic {
 	}
 
 	private Packet updatePacket(Packet p) {
-		if (p == null && (creditsChanged || new Random().nextDouble() < 0.1)) {
+		if (p == null
+				&& (creditsChangeNotification || new Random().nextDouble() < 0.1)) {
 			p = new InfoPacket(state.getSessionId());
 		}
 
 		if (p != null) {
 			p.SetSourceNodeId(getNodeId());
-			HashMap<Integer, HashMap<Integer, CreditAssignment>> newHeader = new HashMap<Integer, HashMap<Integer, CreditAssignment>>();
+			HashMap<Integer, HashMap<Integer, Credit>> newHeader = new HashMap<Integer, HashMap<Integer, Credit>>();
 			SessionState ss = state.getSessionStateById(p.getSessionId());
 
 			if (ss.isDestination && p instanceof AckPacket) {
 				((AckPacket) p).reachableDestIds.add(getNodeId());
 			}
 
-			// copy the credits from the original packet
-			for (int destId : p.header.creditMap.keySet()) {
-				HashMap<Integer, CreditAssignment> innermap = p.header.creditMap
-						.get(destId);
-				newHeader.put(destId, new HashMap<Integer, CreditAssignment>());
+			// update the credits with our credit map
+			for (int destId : ss.creditMap.keySet()) {
+				HashMap<Integer, Credit> innermap = ss.creditMap.get(destId);
+				newHeader.put(destId, new HashMap<Integer, Credit>());
 
 				for (int pid : innermap.keySet()) {
 					newHeader.get(destId).put(pid, innermap.get(pid));
-				}
-			}
-
-			// update the credits with our credit map
-			for (int destId : ss.creditMap.keySet()) {
-				HashMap<Integer, CreditAssignment> innermap = ss.creditMap
-						.get(destId);
-				newHeader.put(destId, new HashMap<Integer, CreditAssignment>());
-
-				for (int pid : innermap.keySet()) {
-					CreditAssignment hca = newHeader.get(destId).get(pid);
-					CreditAssignment oca = innermap.get(pid);
-					if (hca == null || hca.assignmentStep < oca.assignmentStep) {
-						newHeader.get(destId).put(pid, innermap.get(pid));
-					}
 				}
 			}
 

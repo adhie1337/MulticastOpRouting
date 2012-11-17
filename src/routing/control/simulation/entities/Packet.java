@@ -1,7 +1,7 @@
 package routing.control.simulation.entities;
 
 
-public abstract class Packet {
+public abstract class Packet implements Cloneable {
 
 	private static int nextPacketId = 1;
 	protected int id;
@@ -38,4 +38,7 @@ public abstract class Packet {
 		this.batchNumber = batchNumber;
 		this.header = new PacketHeader(sessionId);
 	}
+	
+	@Override
+	public abstract Object clone();
 }

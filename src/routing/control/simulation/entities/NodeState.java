@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import routing.control.SimulationController;
 import routing.control.entities.Session;
+import routing.control.simulation.Simulation;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -15,7 +17,7 @@ import com.google.common.collect.Multimap;
 public class NodeState {
 
 	private int nodeId;
-	private int sessionId = 1;
+	private int currentSessionId = 1;
 
 	private HashMap<Integer, SessionState> sessionState;
 
@@ -24,7 +26,7 @@ public class NodeState {
 	}
 
 	public int getSessionId() {
-		return sessionId;
+		return currentSessionId;
 	}
 
 	public Iterable<Integer> getSessionIds() {
@@ -32,12 +34,12 @@ public class NodeState {
 	}
 
 	public SessionState getSessionState() {
-		return getSessionStateById(sessionId);
+		return getSessionStateById(currentSessionId);
 	}
 
 	public SessionState getSessionStateById(int sessionId) {
 		if (!sessionState.containsKey(sessionId)) {
-			sessionState.put(sessionId, new SessionState());
+			sessionState.put(sessionId, new SessionState(sessionId));
 		}
 
 		return sessionState.get(sessionId);
@@ -69,13 +71,15 @@ public class NodeState {
 
 		public boolean isDestination = false;
 
+		public int sessionId;
+
 		// Nodes, that ack-ed our packets, grouped by the destinations.
 		// destination id, packet id, [node]
 		public HashMap<Integer, HashMultimap<Integer, Integer>> ackData;
 
 		// Nodes, that ack-ed our packets, grouped by the destinations.
 		// destination id, current batch number (sources only)
-		private HashMap<Integer, Integer> batchMap;
+		private HashMap<Integer, HashMap<Integer, Integer>> batchMap;
 
 		// Packets we received, but waiting for credit assignment to happen.
 		// destination id, packet id
@@ -90,8 +94,7 @@ public class NodeState {
 		// destination id, packet id, current forwarder node id
 		// a map of packets with their current forwarder id, who is got the
 		// credit to forward the packet. Grouped by destination identifiers.
-		public HashMap<Integer, HashMap<Integer, CreditAssignment>> creditMap;
-
+		public HashMap<Integer, HashMap<Integer, Credit>> creditMap;
 
 		public Map<Integer, Packet> sentPackets;
 
@@ -100,27 +103,36 @@ public class NodeState {
 
 		public List<Integer> newPackets;
 
-		public SessionState() {
+		public SessionState(int sessionId) {
 			ackData = new HashMap<Integer, HashMultimap<Integer, Integer>>();
 			unassignedPackets = HashMultimap.create();
 			receivedDataPackets = new HashMap<Integer, DataPacket>();
 			receivedDataPacketsFromBatch = 0;
-			creditMap = new HashMap<Integer, HashMap<Integer, CreditAssignment>>();
+			creditMap = new HashMap<Integer, HashMap<Integer, Credit>>();
 			sentPackets = new HashMap<Integer, Packet>();
 			forwarderIds = HashMultimap.create();
 			reachableDestIds = new HashSet<Integer>();
-			batchMap = new HashMap<Integer, Integer>();
+			batchMap = new HashMap<Integer, HashMap<Integer, Integer>>();
 			receivedCount = 0;
 			destBatchNumber = 1;
 			newPackets = new LinkedList<Integer>();
+			this.sessionId = sessionId;
 
 		}
 
-		private HashMap<Integer, Integer> getBatchMap() {
+		private HashMap<Integer, HashMap<Integer, Integer>> getBatchMap() {
 			if (batchMap.size() != reachableDestIds.size()) {
 				for (int id : reachableDestIds) {
 					if (!batchMap.containsKey(id)) {
-						batchMap.put(id, 0);
+						HashMap<Integer, Integer> innerMap = new HashMap<Integer, Integer>();
+						batchMap.put(id, innerMap);
+
+						int max = SimulationController.getInstance()
+								.getCurrentSimulation()
+								.getSessionById(sessionId).batchCount;
+						for (int i = 0; i < max; ++i) {
+							innerMap.put(i, 0);
+						}
 					}
 				}
 			}
@@ -158,8 +170,9 @@ public class NodeState {
 			return retVal;
 		}
 
-		public void incPacketCount(int destId) {
-			getBatchMap().put(destId, getBatchMap().get(destId) + 1);
+		public void incSentPacketCount(int destId, int batchNumber) {
+			HashMap<Integer, Integer> dMap = getBatchMap().get(destId);
+			dMap.put(batchNumber - 1, dMap.get(batchNumber - 1) + 1);
 
 			if (getBatchNumber() > batchCount) {
 				ready = true;
@@ -180,8 +193,14 @@ public class NodeState {
 		}
 
 		public int getBatchNumber(int destId) {
-			return (getBatchMap().get(destId) + Session.PACKETS_PER_BATCH)
-					/ Session.PACKETS_PER_BATCH;
+			HashMap<Integer, Integer> dMap = getBatchMap().get(destId);
+			for (int i = 0; i < dMap.size(); ++i) {
+				if (dMap.get(i) < Session.PACKETS_PER_BATCH) {
+					return i + 1;
+				}
+			}
+
+			return batchCount;
 		}
 
 		public int getCredits() {
@@ -197,7 +216,7 @@ public class NodeState {
 		public int getCredits(int destId) {
 			int retVal = 0;
 
-			for (CreditAssignment ca : creditMap.get(destId).values()) {
+			for (Credit ca : creditMap.get(destId).values()) {
 				if (ca.nodeId == getNodeId()) {
 					++retVal;
 				}
@@ -218,13 +237,13 @@ public class NodeState {
 	// state changes by a data packet
 	public void transformWithDataPacket(DataPacket packet) {
 		transformWithPacket(packet);
-		sessionId = packet.sessionId;
+		currentSessionId = packet.sessionId;
 	}
 
 	// state changes by an acknowledgment packet
 	public void transformWithAckPacket(AckPacket packet) {
 		transformWithPacket(packet);
-		sessionId = packet.sessionId;
+		currentSessionId = packet.sessionId;
 	}
 
 	// common state changes by each packet
@@ -232,7 +251,7 @@ public class NodeState {
 		SessionState psd;
 
 		if (!sessionState.containsKey(packet.sessionId)) {
-			psd = new SessionState();
+			psd = new SessionState(packet.sessionId);
 			sessionState.put(packet.sessionId, psd);
 		} else {
 			psd = sessionState.get(packet.sessionId);
@@ -246,7 +265,7 @@ public class NodeState {
 		SessionState psd;
 
 		if (!sessionState.containsKey(packet.sessionId)) {
-			psd = new SessionState();
+			psd = new SessionState(packet.sessionId);
 			sessionState.put(packet.sessionId, psd);
 		} else {
 			psd = sessionState.get(packet.sessionId);

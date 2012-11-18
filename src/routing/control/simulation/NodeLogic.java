@@ -280,6 +280,7 @@ public class NodeLogic {
 		int chosenPid = -1;
 		int chosenBatch = -1;
 		int chosenSid = -1;
+		
 		// if we are here, there is no session wich's source is the current node
 		// if we have credits, we send a corresponding packet
 		for (int sId : getState().getSessionIds()) {
@@ -371,7 +372,6 @@ public class NodeLogic {
 							}
 
 							packetsToRemove.add(pid);
-							creditsChangeNotification = true;
 						}
 					}
 					// get all nodes ack-ed packed with pid

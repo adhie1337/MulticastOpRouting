@@ -203,4 +203,16 @@ public class EditorController {
 		setCurrentRenderInfo(ri);
 		sessionEditor.showDialog();
 	}
+
+	@Action
+	public void drawGraphAction() {
+		MainFrame mainFrame = RoutingDemo.getMF();
+		mainFrame.setCurrentMode(Canvas.DrawMode.Graph);
+	}
+
+	@Action
+	public void drawWirelessAction() {
+		MainFrame mainFrame = RoutingDemo.getMF();
+		mainFrame.setCurrentMode(Canvas.DrawMode.Wireless);
+	}
 }

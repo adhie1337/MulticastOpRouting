@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.text.NumberFormat;
 import java.util.Iterator;
@@ -27,8 +28,21 @@ import routing.control.entities.Node;
  */
 public class Canvas extends JPanel {
 
+	public static enum DrawMode {Graph, Wireless};
+	
 	private DocumentEditor _editor;
 	private Graph _graph;
+	private DrawMode mode = DrawMode.Graph;
+
+	public DrawMode getMode() {
+		return mode;
+	}
+
+	public void setMode(DrawMode mode) {
+		this.mode = mode;
+		
+		repaint();
+	}
 
 	/**
 	 * Graph setter.
@@ -105,6 +119,14 @@ public class Canvas extends JPanel {
 			return;
 		}
 
+		if(mode == DrawMode.Wireless) {
+			Iterator<Node> nodeIt = _graph.getNodeList().iterator();
+
+			while (nodeIt.hasNext()) {
+				drawNodeRange(nodeIt.next(), g.create());
+			}
+		}
+		
 		((Graphics2D) g).setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		((Graphics2D) g).setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT,
@@ -116,15 +138,16 @@ public class Canvas extends JPanel {
 			drawNode(nodeIt.next(), g.create());
 		}
 
-		Iterator<Edge> edgeIt = _graph.getEdgeList().iterator();
-
-		((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT,
-				BasicStroke.JOIN_BEVEL));
-
-		while (edgeIt.hasNext()) {
-			drawEdge(edgeIt.next(), g.create());
+		if(mode == DrawMode.Graph) {
+			Iterator<Edge> edgeIt = _graph.getEdgeList().iterator();
+	
+			((Graphics2D) g).setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT,
+					BasicStroke.JOIN_BEVEL));
+	
+			while (edgeIt.hasNext()) {
+				drawEdge(edgeIt.next(), g.create());
+			}
 		}
-
 		((Graphics2D) g).setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_BEVEL));
 
@@ -240,6 +263,23 @@ public class Canvas extends JPanel {
 					(int) (pos.y * _zoom + g2.getFont().getSize2D() / 2));
 		}
 
+	}
+
+	private void drawNodeRange(Node n, Graphics g) {
+		java.awt.Point pos = getCorrectedPosition(n);
+		
+		double radius = NODE_RADIUS * 2;
+		
+		for(int id : _graph.getAdjacentNodeIds(n.id)) {
+			Node n2 = _graph.getNode(id);
+			radius = Math.max(radius, Point.distance(n.x, n.y, n2.x, n2.y) + NODE_RADIUS);
+		}
+		
+		g.setColor(new Color(0.5f, 0.5f, 0.5f, 0.25f));
+		g.fillOval((int) ((pos.x - radius) * _zoom),
+				(int) ((pos.y - radius) * _zoom),
+				(int) (2 * radius * _zoom),
+				(int) (2 * radius * _zoom));
 	}
 
 	private void drawEdge(Edge e, Graphics g) {

@@ -78,7 +78,7 @@ public class SimulationController {
 		Transfer t = currentSimulation.step();
 		boolean done = true;
 		
-		// if we stopped, we have to make sure that all detinations ack-ed the last packets
+		// if we stopped, we have to make sure that all destinations ack-ed the last packets
 		if(!currentSimulation.isRunning()) {
 			for(Session s : currentSimulation.getSessions()) {
 				for(int destId : s.destinationIds) {

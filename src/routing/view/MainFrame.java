@@ -19,7 +19,9 @@ import routing.control.Document;
 import routing.control.DocumentController;
 import routing.control.EditorController;
 import routing.control.SimulationController;
+import routing.view.editor.Canvas;
 import routing.view.editor.DocumentEditor;
+import routing.view.editor.Canvas.DrawMode;
 import routing.view.editor.DocumentEditor.EditorMode;
 import routing.view.editor.SessionEditorDialog;
 
@@ -37,6 +39,8 @@ public class MainFrame extends FrameView implements ChangeListener {
 	public SessionPanel sessionPanel;
 
 	private DocumentEditor.EditorMode _currentMode = DocumentEditor.EditorMode.Selection;
+
+	private Canvas.DrawMode _currentDrawMode = Canvas.DrawMode.Graph;
 
 	/**
 	 * Constructor.
@@ -129,6 +133,25 @@ public class MainFrame extends FrameView implements ChangeListener {
 				DocumentEditor editor = (DocumentEditor) tabbedPane
 						.getComponentAt(i);
 				editor.setEditorMode(_currentMode);
+			}
+		}
+	}
+
+	/**
+	 * Sets the currently selected drawing mode.
+	 * 
+	 * @param value
+	 *            the mode to set to.
+	 * @see Canvas.DrawMode
+	 */
+	public void setCurrentMode(Canvas.DrawMode value) {
+		if (_currentDrawMode != value) {
+			_currentDrawMode = value;
+
+			for (int i = 0; tabbedPane != null && i < tabbedPane.getTabCount(); ++i) {
+				DocumentEditor editor = (DocumentEditor) tabbedPane
+						.getComponentAt(i);
+				editor.canvas.setMode(_currentDrawMode);
 			}
 		}
 	}

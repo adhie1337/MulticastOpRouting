@@ -117,7 +117,6 @@ public class NodeState {
 			destBatchNumber = 1;
 			newPackets = new LinkedList<Integer>();
 			this.sessionId = sessionId;
-
 		}
 
 		private HashMap<Integer, HashMap<Integer, Integer>> getBatchMap() {
@@ -171,11 +170,21 @@ public class NodeState {
 		}
 
 		public void incSentPacketCount(int destId, int batchNumber) {
-			HashMap<Integer, Integer> dMap = getBatchMap().get(destId);
+			HashMap<Integer, HashMap<Integer, Integer>> bm = getBatchMap();
+			HashMap<Integer, Integer> dMap = bm.get(destId);
 			dMap.put(batchNumber - 1, dMap.get(batchNumber - 1) + 1);
 
-			if (getBatchNumber() > batchCount) {
-				ready = true;
+			if (getBatchNumber() == batchCount) {
+				boolean finished = true;
+				
+				for(int did : bm.keySet()) {
+					if(bm.get(did).get(batchCount - 1) < Session.PACKETS_PER_BATCH) {
+						finished = false;
+						break;
+					}
+				}
+				
+				ready = finished;
 			}
 		}
 

@@ -147,6 +147,17 @@ public class MenuBar extends JMenuBar {
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, ActionEvent.CTRL_MASK));
         menu.add(menuItem);
 
+        menu = new JMenu(rm.getString("MainFrame.Menu.DrawMode.Text"));
+        add(menu);
+
+        menuItem = new JMenuItem(editorActionMap.get("drawGraphAction"));
+        menuItem.setText(rm.getString("MainFrame.MenuItem.GraphMode.Text"));
+        menu.add(menuItem);
+
+        menuItem = new JMenuItem(editorActionMap.get("drawWirelessAction"));
+        menuItem.setText(rm.getString("MainFrame.MenuItem.WirelessMode.Text"));
+        menu.add(menuItem);
+
         menu = new JMenu(rm.getString("MainFrame.Menu.Help.Text"));
         add(menu);
 
@@ -154,7 +165,6 @@ public class MenuBar extends JMenuBar {
         menuItem.setText(rm.getString("MainFrame.MenuItem.About.Text"));
         menuItem.setIcon(fileRm.getImageIcon("showAboutDialogAction.Action.icon_small"));
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
-
         menu.add(menuItem);
     }
 }
